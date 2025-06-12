@@ -16,6 +16,8 @@ import { useAuth } from "@/lib/auth";
 import { queryClient } from "@/lib/queryClient";
 import { Edit, Save, Download, Upload, Users, Shield, SettingsIcon } from "lucide-react";
 import type { InsertChapterInfo, ChapterInfo, Member, Payment } from "@shared/schema";
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 // Account info form schema
 const accountInfoSchema = z.object({
@@ -172,11 +174,8 @@ export default function Settings() {
   };
 
   // Export data functionality as PDF
-  const exportData = async () => {
+  const exportData = () => {
     try {
-      const { jsPDF } = await import('jspdf');
-      await import('jspdf-autotable');
-      
       const doc = new jsPDF();
       const currentDate = new Date().toLocaleDateString();
       
