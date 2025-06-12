@@ -202,9 +202,9 @@ export default function Settings() {
       yPos += 8;
       doc.text(`Contact Phone: ${chapterInfo?.contactPhone || 'Not set'}`, 20, yPos);
       yPos += 8;
-      doc.text(`Treasurer: ${chapterInfo?.treasurerName || 'Not set'}`, 20, yPos);
+      doc.text(`Master Keeper of the Scroll: ${chapterInfo?.treasurerName || 'Not set'}`, 20, yPos);
       yPos += 8;
-      doc.text(`Treasurer Email: ${chapterInfo?.treasurerEmail || 'Not set'}`, 20, yPos);
+      doc.text(`Master Keeper of the Scroll Email: ${chapterInfo?.treasurerEmail || 'Not set'}`, 20, yPos);
       
       // Members Summary
       yPos += 20;
@@ -447,9 +447,9 @@ export default function Settings() {
                     name="treasurerName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Treasurer Name</FormLabel>
+                        <FormLabel>Master Keeper of the Scroll Name</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter treasurer name" {...field} />
+                          <Input placeholder="Enter Master Keeper of the Scroll name" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -460,9 +460,9 @@ export default function Settings() {
                     name="treasurerEmail"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Treasurer Email</FormLabel>
+                        <FormLabel>Master Keeper of the Scroll Email</FormLabel>
                         <FormControl>
-                          <Input type="email" placeholder="treasurer@chapter.com" {...field} />
+                          <Input type="email" placeholder="scroll-keeper@chapter.com" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -507,7 +507,7 @@ export default function Settings() {
                   <p className="text-sm text-gray-900">{chapterInfo?.contactPhone || "Not set"}</p>
                 </div>
                 <div>
-                  <Label className="text-sm font-medium text-gray-500">Treasurer</Label>
+                  <Label className="text-sm font-medium text-gray-500">Master Keeper of the Scroll</Label>
                   <p className="text-sm text-gray-900">{chapterInfo?.treasurerName || "Not set"}</p>
                   <p className="text-xs text-gray-600">{chapterInfo?.treasurerEmail || ""}</p>
                 </div>
