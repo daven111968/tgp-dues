@@ -249,10 +249,10 @@ export default function Payments() {
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Payment Tracking</h2>
           <p className="text-sm sm:text-base text-gray-600">Track and manage member payment history</p>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 w-full sm:w-auto">
           <Button 
             onClick={() => setIsPaymentModalOpen(true)}
-            className="flex items-center space-x-2"
+            className="flex items-center justify-center space-x-2 touch-friendly"
           >
             <Plus className="h-4 w-4" />
             <span>Record Payment</span>
@@ -260,7 +260,7 @@ export default function Payments() {
           <Button 
             onClick={handleClearPayments}
             variant="destructive"
-            className="flex items-center space-x-2"
+            className="flex items-center justify-center space-x-2 touch-friendly"
             disabled={clearPaymentsMutation.isPending || payments.length === 0}
           >
             <Trash2 className="h-4 w-4" />
@@ -270,7 +270,7 @@ export default function Payments() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -358,8 +358,8 @@ export default function Payments() {
           <CardTitle>Payment History</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
+          <div className="mobile-scroll">
+            <Table className="min-w-full">
               <TableHeader>
                 <TableRow>
                   <TableHead>Member</TableHead>

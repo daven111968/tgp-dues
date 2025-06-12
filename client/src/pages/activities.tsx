@@ -147,11 +147,11 @@ export default function Activities() {
   };
 
   return (
-    <div className="flex-1 overflow-auto p-6">
-      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex-1 overflow-auto p-4 sm:p-6">
+      <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div className="mb-4 sm:mb-0">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Activity Contributions</h2>
-          <p className="text-gray-600">Track fundraising activities and member contributions</p>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Activity Contributions</h2>
+          <p className="text-sm sm:text-base text-gray-600">Track fundraising activities and member contributions</p>
         </div>
         <div className="flex space-x-2">
           <Button 
