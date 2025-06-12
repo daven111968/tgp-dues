@@ -131,8 +131,9 @@ export default function MemberPortal() {
     ? allMonthlyStats 
     : allMonthlyStats.filter(stat => {
         const [year, month] = selectedPaymentStatMonth.split('-').map(Number);
-        const statDate = new Date(stat.month + ' 1, 2024');
-        return statDate.getMonth() === month - 1 && statDate.getFullYear() === year;
+        // Parse the stat.month to get the actual month and year
+        const statDate = new Date(stat.month + ' 1, ' + year);
+        return statDate.getMonth() === month - 1;
       });
 
   // Calculate payment status
@@ -228,18 +229,31 @@ export default function MemberPortal() {
                 <SelectValue placeholder="Select Period" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Months (12)</SelectItem>
-                {Array.from({ length: 12 }, (_, i) => {
-                  const date = new Date();
-                  date.setMonth(i);
+                <SelectItem value="all">All Months</SelectItem>
+                {(() => {
+                  // Get available years from payment data
+                  const paymentYears = payments.map(payment => new Date(payment.paymentDate).getFullYear());
+                  const yearSet = new Set(paymentYears);
+                  const uniqueYears: number[] = [];
+                  yearSet.forEach(year => uniqueYears.push(year));
+                  uniqueYears.sort((a, b) => b - a);
+                  
                   const currentYear = new Date().getFullYear();
-                  const monthValue = `${currentYear}-${String(i + 1).padStart(2, '0')}`;
-                  return (
-                    <SelectItem key={monthValue} value={monthValue}>
-                      {date.toLocaleDateString('en-US', { month: 'long' })} {currentYear}
-                    </SelectItem>
+                  const availableYears = uniqueYears.length > 0 ? uniqueYears : [currentYear];
+                  
+                  return availableYears.flatMap(year => 
+                    Array.from({ length: 12 }, (_, i) => {
+                      const date = new Date();
+                      date.setMonth(i);
+                      const monthValue = `${year}-${String(i + 1).padStart(2, '0')}`;
+                      return (
+                        <SelectItem key={monthValue} value={monthValue}>
+                          {date.toLocaleDateString('en-US', { month: 'long' })} {year}
+                        </SelectItem>
+                      );
+                    })
                   );
-                })}
+                })()}
               </SelectContent>
             </Select>
           </div>
@@ -539,17 +553,30 @@ export default function MemberPortal() {
                     <SelectValue placeholder="Select Month" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Array.from({ length: 12 }, (_, i) => {
-                      const date = new Date();
-                      date.setMonth(i);
+                    {(() => {
+                      // Get available years from payment data
+                      const paymentYears = payments.map(payment => new Date(payment.paymentDate).getFullYear());
+                      const yearSet = new Set(paymentYears);
+                      const uniqueYears: number[] = [];
+                      yearSet.forEach(year => uniqueYears.push(year));
+                      uniqueYears.sort((a, b) => b - a);
+                      
                       const currentYear = new Date().getFullYear();
-                      const monthValue = `${currentYear}-${String(i + 1).padStart(2, '0')}`;
-                      return (
-                        <SelectItem key={monthValue} value={monthValue}>
-                          {date.toLocaleDateString('en-US', { month: 'long' })} {currentYear}
-                        </SelectItem>
+                      const availableYears = uniqueYears.length > 0 ? uniqueYears : [currentYear];
+                      
+                      return availableYears.flatMap(year => 
+                        Array.from({ length: 12 }, (_, i) => {
+                          const date = new Date();
+                          date.setMonth(i);
+                          const monthValue = `${year}-${String(i + 1).padStart(2, '0')}`;
+                          return (
+                            <SelectItem key={monthValue} value={monthValue}>
+                              {date.toLocaleDateString('en-US', { month: 'long' })} {year}
+                            </SelectItem>
+                          );
+                        })
                       );
-                    })}
+                    })()}
                   </SelectContent>
                 </Select>
               </div>

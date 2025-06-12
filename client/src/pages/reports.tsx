@@ -146,8 +146,9 @@ export default function Reports() {
     ? allMonthlyStats 
     : allMonthlyStats.filter(stat => {
         const [year, month] = selectedStatMonth.split('-').map(Number);
-        const statDate = new Date(stat.month + ' 1, 2024');
-        return statDate.getMonth() === month - 1 && statDate.getFullYear() === year;
+        // Parse the stat.month to get the actual month and year
+        const statDate = new Date(stat.month + ' 1, ' + year);
+        return statDate.getMonth() === month - 1;
       });
 
   // Calculate monthly summary
@@ -577,18 +578,19 @@ export default function Reports() {
                 <SelectValue placeholder="Select Period" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Months (12)</SelectItem>
-                {Array.from({ length: 12 }, (_, i) => {
-                  const date = new Date();
-                  date.setMonth(i);
-                  const currentYear = new Date().getFullYear();
-                  const monthValue = `${currentYear}-${String(i + 1).padStart(2, '0')}`;
-                  return (
-                    <SelectItem key={monthValue} value={monthValue}>
-                      {date.toLocaleDateString('en-US', { month: 'long' })} {currentYear}
-                    </SelectItem>
-                  );
-                })}
+                <SelectItem value="all">All Months</SelectItem>
+                {getAvailableYears().flatMap(year => 
+                  Array.from({ length: 12 }, (_, i) => {
+                    const date = new Date();
+                    date.setMonth(i);
+                    const monthValue = `${year}-${String(i + 1).padStart(2, '0')}`;
+                    return (
+                      <SelectItem key={monthValue} value={monthValue}>
+                        {date.toLocaleDateString('en-US', { month: 'long' })} {year}
+                      </SelectItem>
+                    );
+                  })
+                )}
               </SelectContent>
             </Select>
           </div>
@@ -650,17 +652,18 @@ export default function Reports() {
                 <SelectValue placeholder="Select Month" />
               </SelectTrigger>
               <SelectContent>
-                {Array.from({ length: 12 }, (_, i) => {
-                  const date = new Date();
-                  date.setMonth(i);
-                  const currentYear = new Date().getFullYear();
-                  const monthValue = `${currentYear}-${String(i + 1).padStart(2, '0')}`;
-                  return (
-                    <SelectItem key={monthValue} value={monthValue}>
-                      {date.toLocaleDateString('en-US', { month: 'long' })} {currentYear}
-                    </SelectItem>
-                  );
-                })}
+                {getAvailableYears().flatMap(year => 
+                  Array.from({ length: 12 }, (_, i) => {
+                    const date = new Date();
+                    date.setMonth(i);
+                    const monthValue = `${year}-${String(i + 1).padStart(2, '0')}`;
+                    return (
+                      <SelectItem key={monthValue} value={monthValue}>
+                        {date.toLocaleDateString('en-US', { month: 'long' })} {year}
+                      </SelectItem>
+                    );
+                  })
+                )}
               </SelectContent>
             </Select>
           </div>
