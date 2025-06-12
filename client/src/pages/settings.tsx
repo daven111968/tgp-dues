@@ -17,7 +17,7 @@ import { queryClient } from "@/lib/queryClient";
 import { Edit, Save, Download, Upload, Users, Shield, SettingsIcon } from "lucide-react";
 import type { InsertChapterInfo, ChapterInfo, Member, Payment } from "@shared/schema";
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 // Account info form schema
 const accountInfoSchema = z.object({
@@ -176,7 +176,6 @@ export default function Settings() {
   // Export data functionality as PDF
   const exportData = () => {
     console.log('Settings exportData function called');
-    alert('Settings PDF export function triggered');
     try {
       const doc = new jsPDF();
       const currentDate = new Date().toLocaleDateString();
@@ -235,7 +234,7 @@ export default function Settings() {
           new Date(member.joinedAt).toLocaleDateString()
         ]);
         
-        (doc as any).autoTable({
+        autoTable(doc, {
           startY: yPos + 10,
           head: [['Name', 'Batch Number', 'Email', 'Status', 'Joined Date']],
           body: memberTableData,
@@ -272,7 +271,7 @@ export default function Settings() {
           ];
         });
         
-        (doc as any).autoTable({
+        autoTable(doc, {
           startY: yPos + 10,
           head: [['Member Name', 'Amount', 'Payment Date', 'Notes']],
           body: paymentTableData,
@@ -300,11 +299,12 @@ export default function Settings() {
         title: "PDF Report Generated",
         description: "Chapter data has been exported as PDF successfully.",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Export error:', error);
+      console.error('Error details:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
       toast({
         title: "Export Error",
-        description: "Failed to generate PDF report. Please try again.",
+        description: `Failed to generate PDF report: ${error.message || 'Unknown error'}`,
         variant: "destructive",
       });
     }
