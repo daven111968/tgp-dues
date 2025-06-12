@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -117,6 +118,55 @@ export default function Activities() {
   const onSubmitContribution = (data: InsertContribution) => {
     createContributionMutation.mutate(data);
   };
+
+  // Delete mutations
+  const deleteActivityMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/activities/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error('Failed to delete activity');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/activities"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/contributions"] });
+      toast({
+        title: "Success",
+        description: "Activity deleted successfully",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete activity",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteContributionMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/contributions/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error('Failed to delete contribution');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/contributions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/activities"] });
+      toast({
+        title: "Success",
+        description: "Contribution deleted successfully",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete contribution",
+        variant: "destructive",
+      });
+    },
+  });
 
   const formatDate = (date: string | Date) => {
     return new Date(date).toLocaleDateString('en-US', {
@@ -393,9 +443,35 @@ export default function Activities() {
                         <p className="text-gray-600 text-sm mt-1">{activity.description}</p>
                       )}
                     </div>
-                    <Badge className={getStatusColor(activity.status)}>
-                      {activity.status}
-                    </Badge>
+                    <div className="flex items-center space-x-2">
+                      <Badge className={getStatusColor(activity.status)}>
+                        {activity.status}
+                      </Badge>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Activity</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete "{activity.name}"? This will also delete all contributions associated with this activity. This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => deleteActivityMutation.mutate(activity.id)}
+                              className="bg-red-600 hover:bg-red-700"
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -433,6 +509,7 @@ export default function Activities() {
                                   <TableHead className="py-2 text-xs">Amount</TableHead>
                                   <TableHead className="py-2 text-xs">Date</TableHead>
                                   <TableHead className="py-2 text-xs">Notes</TableHead>
+                                  <TableHead className="py-2 text-xs w-12">Action</TableHead>
                                 </TableRow>
                               </TableHeader>
                               <TableBody>
@@ -442,6 +519,32 @@ export default function Activities() {
                                     <TableCell className="py-2 text-sm">₱{parseFloat(contrib.amount).toLocaleString()}</TableCell>
                                     <TableCell className="py-2 text-sm">{formatDate(contrib.contributionDate)}</TableCell>
                                     <TableCell className="py-2 text-sm">{contrib.notes || '-'}</TableCell>
+                                    <TableCell className="py-2 text-sm">
+                                      <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                          <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700 p-1">
+                                            <Trash2 className="h-3 w-3" />
+                                          </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                          <AlertDialogHeader>
+                                            <AlertDialogTitle>Delete Contribution</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                              Are you sure you want to delete this ₱{parseFloat(contrib.amount).toLocaleString()} contribution from {contrib.memberName}? This action cannot be undone.
+                                            </AlertDialogDescription>
+                                          </AlertDialogHeader>
+                                          <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction
+                                              onClick={() => deleteContributionMutation.mutate(contrib.id)}
+                                              className="bg-red-600 hover:bg-red-700"
+                                            >
+                                              Delete
+                                            </AlertDialogAction>
+                                          </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                      </AlertDialog>
+                                    </TableCell>
                                   </TableRow>
                                 ))}
                               </TableBody>
@@ -488,6 +591,7 @@ export default function Activities() {
                   <TableHead>Activity</TableHead>
                   <TableHead>Amount</TableHead>
                   <TableHead>Notes</TableHead>
+                  <TableHead className="w-12">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -498,6 +602,32 @@ export default function Activities() {
                     <TableCell>{contribution.activityName}</TableCell>
                     <TableCell>₱{parseFloat(contribution.amount).toLocaleString()}</TableCell>
                     <TableCell>{contribution.notes || '-'}</TableCell>
+                    <TableCell>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Contribution</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete this ₱{parseFloat(contribution.amount).toLocaleString()} contribution from {contribution.memberName} for {contribution.activityName}? This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => deleteContributionMutation.mutate(contribution.id)}
+                              className="bg-red-600 hover:bg-red-700"
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
