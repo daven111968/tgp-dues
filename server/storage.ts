@@ -122,21 +122,21 @@ export class DatabaseStorage implements IStorage {
           memberId: createdMembers[0].id,
           amount: "500.00",
           paymentDate: thisMonth,
-          notes: "December 2024 dues"
+          notes: `${thisMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} dues`
         });
 
         await this.createPayment({
           memberId: createdMembers[1].id,
           amount: "500.00", 
           paymentDate: lastMonth,
-          notes: "November 2024 dues"
+          notes: `${lastMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} dues`
         });
 
         await this.createPayment({
           memberId: createdMembers[2].id,
           amount: "500.00",
           paymentDate: twoMonthsAgo,
-          notes: "October 2024 dues"
+          notes: `${twoMonthsAgo.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} dues`
         });
       }
     } catch (error) {

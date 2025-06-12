@@ -234,7 +234,7 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
                   id="batchNumber"
                   value={batchNumber}
                   onChange={(e) => setBatchNumber(e.target.value)}
-                  placeholder="Batch-2024"
+                  placeholder={`Batch-${new Date().getFullYear()}`}
                   required
                 />
               </div>

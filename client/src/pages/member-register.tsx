@@ -243,7 +243,7 @@ export default function MemberRegister() {
                       type="text"
                       value={formData.batchNumber}
                       onChange={(e) => handleInputChange("batchNumber", e.target.value)}
-                      placeholder="e.g., Batch-2024"
+                      placeholder={`e.g., Batch-${new Date().getFullYear()}`}
                       required
                       className="mt-1"
                     />

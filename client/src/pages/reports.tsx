@@ -446,7 +446,7 @@ export default function Reports() {
                 <SelectItem value="all">All Months</SelectItem>
                 {Array.from({ length: 12 }, (_, i) => (
                   <SelectItem key={i} value={i.toString()}>
-                    {new Date(2000, i).toLocaleDateString('en-US', { month: 'long' })}
+                    {new Date(new Date().getFullYear(), i).toLocaleDateString('en-US', { month: 'long' })}
                   </SelectItem>
                 ))}
               </SelectContent>
