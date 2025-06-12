@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Tau Gamma Phi Rahugan CBC Chapter - Dues Management System Installer
-# Ubuntu VPS Deployment Script
+# Ubuntu VPS Deployment Script (Root Directory Version)
 
 set -e  # Exit on any error
 
@@ -37,21 +37,25 @@ print_error() {
 
 check_root() {
     if [[ $EUID -eq 0 ]]; then
-        print_error "This script should not be run as root. Please run as a regular user with sudo privileges."
-        exit 1
+        print_warning "Running as root. This is acceptable for VPS deployment."
+        CURRENT_USER="root"
+        HOME_DIR="/root"
+    else
+        CURRENT_USER=$USER
+        HOME_DIR=$HOME
     fi
 }
 
 update_system() {
     print_status "Updating system packages..."
-    sudo apt update && sudo apt upgrade -y
+    apt update && apt upgrade -y
     print_success "System updated successfully"
 }
 
 install_nodejs() {
     print_status "Installing Node.js 20..."
-    curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-    sudo apt-get install -y nodejs
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+    apt-get install -y nodejs
     
     # Verify installation
     node_version=$(node --version)
@@ -61,9 +65,9 @@ install_nodejs() {
 
 install_postgresql() {
     print_status "Installing PostgreSQL..."
-    sudo apt install postgresql postgresql-contrib -y
-    sudo systemctl start postgresql
-    sudo systemctl enable postgresql
+    apt install postgresql postgresql-contrib -y
+    systemctl start postgresql
+    systemctl enable postgresql
     print_success "PostgreSQL installed and started"
 }
 
@@ -85,54 +89,53 @@ EOF
     PG_CONFIG="/etc/postgresql/$PG_VERSION/main/pg_hba.conf"
     
     # Backup original config
-    sudo cp $PG_CONFIG $PG_CONFIG.backup
+    cp $PG_CONFIG $PG_CONFIG.backup
     
     # Update authentication method
-    sudo sed -i "s/local   all             all                                     peer/local   all             all                                     md5/" $PG_CONFIG
+    sed -i "s/local   all             all                                     peer/local   all             all                                     md5/" $PG_CONFIG
     
     # Restart PostgreSQL
-    sudo systemctl restart postgresql
+    systemctl restart postgresql
     
     print_success "Database setup completed"
 }
 
 install_pm2() {
     print_status "Installing PM2 process manager..."
-    sudo npm install -g pm2
+    npm install -g pm2
     print_success "PM2 installed"
 }
 
 install_nginx() {
     print_status "Installing Nginx..."
-    sudo apt install nginx -y
-    sudo systemctl start nginx
-    sudo systemctl enable nginx
+    apt install nginx -y
+    systemctl start nginx
+    systemctl enable nginx
     print_success "Nginx installed and started"
 }
 
 setup_application() {
-    print_status "Setting up application directory..."
+    print_status "Setting up application from current directory..."
     
-    # Determine current directory and setup app directory
+    # Current directory should contain the project files
     CURRENT_DIR=$(pwd)
+    print_status "Current directory: $CURRENT_DIR"
     
-    if [ "$CURRENT_DIR" = "/root" ] || [ "$CURRENT_DIR" = "$HOME" ]; then
-        # If running from root or home, create separate app directory
-        sudo mkdir -p $APP_DIR
-        sudo chown $USER:$USER $APP_DIR
-        
-        # Copy application files to the directory
-        print_status "Copying application files from $CURRENT_DIR to $APP_DIR..."
-        cp -r . $APP_DIR/
-        cd $APP_DIR
-    else
-        # If already in a project directory, use current location as app directory
-        APP_DIR=$CURRENT_DIR
-        print_status "Using current directory as application directory: $APP_DIR"
-        
-        # Ensure proper ownership
-        sudo chown -R $USER:$USER $APP_DIR
-    fi
+    # Create app directory and copy files
+    mkdir -p $APP_DIR
+    
+    # Copy all files except hidden ones and this script
+    print_status "Copying application files to $APP_DIR..."
+    find . -maxdepth 1 -name ".*" -prune -o -type f -print | grep -v "deploy" | while read file; do
+        cp "$file" "$APP_DIR/"
+    done
+    
+    # Copy directories
+    find . -maxdepth 1 -type d -name ".*" -prune -o -type d ! -name "." -print | while read dir; do
+        cp -r "$dir" "$APP_DIR/"
+    done
+    
+    cd $APP_DIR
     
     # Install dependencies
     print_status "Installing application dependencies..."
@@ -157,7 +160,6 @@ EOF
 setup_pm2_config() {
     print_status "Setting up PM2 configuration..."
     
-    # Ensure we're in the correct app directory
     cd $APP_DIR
     
     # Create PM2 ecosystem file
@@ -187,7 +189,12 @@ EOF
     pm2 save
     
     # Set PM2 to start on boot
-    pm2 startup | grep "sudo env" | bash
+    if [[ $CURRENT_USER == "root" ]]; then
+        pm2 startup systemd -u root --hp /root
+        env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u root --hp /root
+    else
+        pm2 startup | grep "sudo env" | bash
+    fi
     
     print_success "PM2 configuration completed"
 }
@@ -195,11 +202,11 @@ EOF
 setup_nginx() {
     print_status "Configuring Nginx reverse proxy..."
     
-    # Get server IP or ask for domain
+    # Get server IP
     SERVER_IP=$(curl -s ifconfig.me)
     
     # Create Nginx configuration
-    sudo tee /etc/nginx/sites-available/tgp-dues << EOF
+    tee /etc/nginx/sites-available/tgp-dues << EOF
 server {
     listen 80;
     server_name $SERVER_IP _;
@@ -219,16 +226,16 @@ server {
 EOF
 
     # Enable the site
-    sudo ln -sf /etc/nginx/sites-available/tgp-dues /etc/nginx/sites-enabled/
+    ln -sf /etc/nginx/sites-available/tgp-dues /etc/nginx/sites-enabled/
     
     # Remove default site
-    sudo rm -f /etc/nginx/sites-enabled/default
+    rm -f /etc/nginx/sites-enabled/default
     
     # Test Nginx configuration
-    sudo nginx -t
+    nginx -t
     
     # Restart Nginx
-    sudo systemctl restart nginx
+    systemctl restart nginx
     
     print_success "Nginx configuration completed"
 }
@@ -237,12 +244,12 @@ setup_firewall() {
     print_status "Configuring firewall..."
     
     # Enable UFW firewall
-    sudo ufw --force enable
+    ufw --force enable
     
     # Allow SSH, HTTP, and HTTPS
-    sudo ufw allow ssh
-    sudo ufw allow 80
-    sudo ufw allow 443
+    ufw allow ssh
+    ufw allow 80
+    ufw allow 443
     
     print_success "Firewall configured"
 }
@@ -259,11 +266,12 @@ test_deployment() {
         print_success "Application is running with PM2"
     else
         print_error "Application failed to start with PM2"
+        print_status "Checking PM2 logs..."
+        pm2 logs tgp-dues --lines 10
         return 1
     fi
     
     # Test HTTP response
-    SERVER_IP=$(curl -s ifconfig.me)
     if curl -s -o /dev/null -w "%{http_code}" http://localhost:$APP_PORT | grep -q "200\|302"; then
         print_success "Application is responding on port $APP_PORT"
     else
@@ -279,12 +287,6 @@ test_deployment() {
     fi
 }
 
-cleanup() {
-    print_status "Cleaning up..."
-    sudo apt autoremove -y
-    sudo apt autoclean
-}
-
 show_completion_info() {
     SERVER_IP=$(curl -s ifconfig.me)
     
@@ -294,14 +296,14 @@ show_completion_info() {
     echo -e "${GREEN}============================================${NC}"
     echo ""
     echo -e "${BLUE}Application URL:${NC} http://$SERVER_IP"
+    echo -e "${BLUE}Application Directory:${NC} $APP_DIR"
+    echo ""
     echo -e "${BLUE}Admin Login:${NC}"
     echo -e "  Username: treasurer"
     echo -e "  Password: password123"
     echo ""
     echo -e "${BLUE}Member Login Examples:${NC}"
-    echo -e "  Username: juan.delacruz"
-    echo -e "  Username: mark.santos"
-    echo -e "  Username: paolo.rodriguez"
+    echo -e "  Username: juan.delacruz, mark.santos, paolo.rodriguez"
     echo -e "  Password: member123"
     echo ""
     echo -e "${BLUE}Database Credentials:${NC}"
@@ -309,13 +311,10 @@ show_completion_info() {
     echo -e "  Username: $DB_USER"
     echo -e "  Password: $DB_PASSWORD"
     echo ""
-    echo -e "${BLUE}Useful Commands:${NC}"
+    echo -e "${BLUE}Management Commands:${NC}"
     echo -e "  View logs: ${YELLOW}pm2 logs tgp-dues${NC}"
     echo -e "  Restart app: ${YELLOW}pm2 restart tgp-dues${NC}"
     echo -e "  Check status: ${YELLOW}pm2 status${NC}"
-    echo ""
-    echo -e "${YELLOW}Note: If you have a domain, update the Nginx configuration${NC}"
-    echo -e "${YELLOW}in /etc/nginx/sites-available/tgp-dues${NC}"
     echo ""
 }
 
@@ -323,13 +322,13 @@ main() {
     echo -e "${BLUE}"
     echo "=========================================="
     echo "  TGP Rahugan CBC Dues Management System"
-    echo "  Ubuntu VPS Deployment Installer"
+    echo "  Ubuntu VPS Deployment (Root Version)"
     echo "=========================================="
     echo -e "${NC}"
     
     check_root
     
-    print_status "Starting deployment process..."
+    print_status "Starting deployment from $(pwd)..."
     
     update_system
     install_nodejs
@@ -342,7 +341,6 @@ main() {
     setup_nginx
     setup_firewall
     test_deployment
-    cleanup
     
     show_completion_info
     
