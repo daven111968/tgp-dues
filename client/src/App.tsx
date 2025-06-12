@@ -33,6 +33,7 @@ function AuthenticatedApp() {
           <Route path="/dashboard" component={() => <Dashboard />} />
           <Route path="/members" component={() => <Members />} />
           <Route path="/payments" component={() => <Payments />} />
+          <Route path="/activities" component={() => <Activities />} />
           <Route path="/reports" component={() => <Reports />} />
           <Route path="/settings" component={() => <Settings />} />
           <Route component={NotFound} />

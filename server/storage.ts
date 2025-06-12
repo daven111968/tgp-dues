@@ -1,6 +1,6 @@
-import { users, members, payments, type User, type InsertUser, type Member, type InsertMember, type Payment, type InsertPayment } from "@shared/schema";
+import { users, members, payments, chapterInfo, activities, contributions, type User, type InsertUser, type Member, type InsertMember, type Payment, type InsertPayment, type ChapterInfo, type InsertChapterInfo, type Activity, type InsertActivity, type Contribution, type InsertContribution } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -28,6 +28,21 @@ export interface IStorage {
     overdueMembers: number;
   }>;
   getRecentPayments(limit?: number): Promise<Array<Payment & { memberName: string }>>;
+  
+  // Chapter info methods
+  getChapterInfo(): Promise<ChapterInfo | undefined>;
+  updateChapterInfo(info: InsertChapterInfo): Promise<ChapterInfo>;
+  
+  // Activity methods
+  getActivities(): Promise<Activity[]>;
+  getActivity(id: number): Promise<Activity | undefined>;
+  createActivity(activity: InsertActivity): Promise<Activity>;
+  updateActivity(id: number, activity: Partial<InsertActivity>): Promise<Activity | undefined>;
+  
+  // Contribution methods
+  getContributions(): Promise<Array<Contribution & { memberName: string; activityName: string }>>;
+  getContributionsByActivity(activityId: number): Promise<Array<Contribution & { memberName: string }>>;
+  createContribution(contribution: InsertContribution): Promise<Contribution>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -242,6 +257,117 @@ export class DatabaseStorage implements IStorage {
     return paymentsWithNames
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, limit);
+  }
+
+  // Chapter info methods
+  async getChapterInfo(): Promise<ChapterInfo | undefined> {
+    const [info] = await db.select().from(chapterInfo).limit(1);
+    return info || undefined;
+  }
+
+  async updateChapterInfo(info: InsertChapterInfo): Promise<ChapterInfo> {
+    const existing = await this.getChapterInfo();
+    
+    if (existing) {
+      const [updated] = await db
+        .update(chapterInfo)
+        .set({ ...info, updatedAt: new Date() })
+        .where(eq(chapterInfo.id, existing.id))
+        .returning();
+      return updated;
+    } else {
+      const [created] = await db
+        .insert(chapterInfo)
+        .values(info)
+        .returning();
+      return created;
+    }
+  }
+
+  // Activity methods
+  async getActivities(): Promise<Activity[]> {
+    return await db.select().from(activities).orderBy(sql`${activities.createdAt} DESC`);
+  }
+
+  async getActivity(id: number): Promise<Activity | undefined> {
+    const [activity] = await db.select().from(activities).where(eq(activities.id, id));
+    return activity || undefined;
+  }
+
+  async createActivity(insertActivity: InsertActivity): Promise<Activity> {
+    const [activity] = await db
+      .insert(activities)
+      .values(insertActivity)
+      .returning();
+    return activity;
+  }
+
+  async updateActivity(id: number, activityUpdate: Partial<InsertActivity>): Promise<Activity | undefined> {
+    const [activity] = await db
+      .update(activities)
+      .set(activityUpdate)
+      .where(eq(activities.id, id))
+      .returning();
+    return activity || undefined;
+  }
+
+  // Contribution methods
+  async getContributions(): Promise<Array<Contribution & { memberName: string; activityName: string }>> {
+    const result = await db
+      .select({
+        id: contributions.id,
+        activityId: contributions.activityId,
+        memberId: contributions.memberId,
+        amount: contributions.amount,
+        contributionDate: contributions.contributionDate,
+        notes: contributions.notes,
+        createdAt: contributions.createdAt,
+        memberName: members.name,
+        activityName: activities.name,
+      })
+      .from(contributions)
+      .innerJoin(members, eq(contributions.memberId, members.id))
+      .innerJoin(activities, eq(contributions.activityId, activities.id))
+      .orderBy(sql`${contributions.createdAt} DESC`);
+
+    return result;
+  }
+
+  async getContributionsByActivity(activityId: number): Promise<Array<Contribution & { memberName: string }>> {
+    const result = await db
+      .select({
+        id: contributions.id,
+        activityId: contributions.activityId,
+        memberId: contributions.memberId,
+        amount: contributions.amount,
+        contributionDate: contributions.contributionDate,
+        notes: contributions.notes,
+        createdAt: contributions.createdAt,
+        memberName: members.name,
+      })
+      .from(contributions)
+      .innerJoin(members, eq(contributions.memberId, members.id))
+      .where(eq(contributions.activityId, activityId))
+      .orderBy(sql`${contributions.createdAt} DESC`);
+
+    return result;
+  }
+
+  async createContribution(insertContribution: InsertContribution): Promise<Contribution> {
+    const [contribution] = await db
+      .insert(contributions)
+      .values(insertContribution)
+      .returning();
+
+    // Update activity current amount
+    await db
+      .update(activities)
+      .set({
+        currentAmount: sql`${activities.currentAmount} + ${insertContribution.amount}`
+      })
+      .where(eq(activities.id, insertContribution.activityId));
+
+    return contribution;
   }
 }
 
