@@ -21,7 +21,6 @@ export const members = pgTable("members", {
   memberType: text("member_type").notNull().default("pure_blooded"), // pure_blooded, welcome
   welcomingDate: timestamp("welcoming_date"),
   status: text("status").notNull().default("active"), // active, inactive
-  joinedAt: timestamp("joined_at").notNull().defaultNow(),
 });
 
 export const payments = pgTable("payments", {
@@ -71,7 +70,9 @@ export const insertUserSchema = createInsertSchema(users).omit({
 
 export const insertMemberSchema = createInsertSchema(members).omit({
   id: true,
-  joinedAt: true,
+}).extend({
+  initiationDate: z.coerce.date(),
+  welcomingDate: z.coerce.date().optional(),
 });
 
 export const insertPaymentSchema = createInsertSchema(payments).omit({

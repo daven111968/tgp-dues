@@ -379,13 +379,6 @@ export default function Members() {
                           <p className="text-sm text-gray-900">{formatDate(viewingMember.initiationDate)}</p>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-3">
-                        <Calendar className="h-4 w-4 text-gray-500" />
-                        <div>
-                          <p className="text-sm font-medium text-gray-500">Joined Chapter</p>
-                          <p className="text-sm text-gray-900">{formatDate(viewingMember.joinedAt)}</p>
-                        </div>
-                      </div>
                     </div>
                     <div className="space-y-4">
                       <div>
