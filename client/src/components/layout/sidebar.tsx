@@ -1,4 +1,4 @@
-import { Users, BarChart3, CreditCard, Settings, Gauge } from "lucide-react";
+import { Users, BarChart3, CreditCard, Settings, Gauge, Calendar } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: Gauge },
   { name: "Members", href: "/members", icon: Users },
   { name: "Payment Tracking", href: "/payments", icon: CreditCard },
+  { name: "Activity Contributions", href: "/activities", icon: Calendar },
   { name: "Financial Reports", href: "/reports", icon: BarChart3 },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
@@ -25,7 +26,7 @@ export default function Sidebar() {
           </div>
           <div>
             <h1 className="text-lg font-bold text-gray-900">TGP Rahugan CBC</h1>
-            <p className="text-sm text-gray-600">Chapter Management</p>
+            <p className="text-sm text-gray-600">Finance Management</p>
           </div>
         </div>
       </div>

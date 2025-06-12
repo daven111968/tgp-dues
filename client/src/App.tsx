@@ -8,6 +8,7 @@ import Login from "@/pages/login";
 import Dashboard from "@/pages/dashboard";
 import Members from "@/pages/members";
 import Payments from "@/pages/payments";
+import Activities from "@/pages/activities";
 import Reports from "@/pages/reports";
 import Settings from "@/pages/settings";
 import Sidebar from "@/components/layout/sidebar";
