@@ -444,11 +444,15 @@ export default function Reports() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Months</SelectItem>
-                {Array.from({ length: 12 }, (_, i) => (
-                  <SelectItem key={i} value={i.toString()}>
-                    {new Date(new Date().getFullYear(), i).toLocaleDateString('en-US', { month: 'long' })}
-                  </SelectItem>
-                ))}
+                {Array.from({ length: 12 }, (_, i) => {
+                  // Use selected year or current year for month display
+                  const displayYear = selectedYear !== "all" ? parseInt(selectedYear) : new Date().getFullYear();
+                  return (
+                    <SelectItem key={i} value={i.toString()}>
+                      {new Date(displayYear, i).toLocaleDateString('en-US', { month: 'long' })}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </div>
