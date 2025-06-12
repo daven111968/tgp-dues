@@ -121,9 +121,9 @@ export default function MemberPortal() {
                 <div className="space-y-4">
                   <div>
                     <p className="text-sm font-medium text-gray-500">Full Name</p>
-                    <p className="text-lg font-semibold text-gray-900">{foundMember.name}</p>
-                    {foundMember.alexisName && (
-                      <p className="text-sm text-gray-600">Alexis Name: {foundMember.alexisName}</p>
+                    <p className="text-lg font-semibold text-gray-900">{currentMember.name}</p>
+                    {currentMember.alexisName && (
+                      <p className="text-sm text-gray-600">Alexis Name: {currentMember.alexisName}</p>
                     )}
                   </div>
                   
@@ -131,16 +131,16 @@ export default function MemberPortal() {
                     <MapPin className="h-4 w-4 text-gray-500" />
                     <div>
                       <p className="text-sm font-medium text-gray-500">Address</p>
-                      <p className="text-sm text-gray-900">{foundMember.address}</p>
+                      <p className="text-sm text-gray-900">{currentMember.address}</p>
                     </div>
                   </div>
 
-                  {foundMember.batchNumber && (
+                  {currentMember.batchNumber && (
                     <div>
                       <p className="text-sm font-medium text-gray-500">Batch Information</p>
                       <p className="text-sm text-gray-900">
-                        {foundMember.batchNumber}
-                        {foundMember.batchName && ` - ${foundMember.batchName}`}
+                        {currentMember.batchNumber}
+                        {currentMember.batchName && ` - ${currentMember.batchName}`}
                       </p>
                     </div>
                   )}
@@ -150,7 +150,7 @@ export default function MemberPortal() {
                   <div>
                     <p className="text-sm font-medium text-gray-500">Member Type</p>
                     <p className="text-sm text-gray-900">
-                      {foundMember.memberType === "pure_blooded" ? "Pure Blooded" : "Welcome"}
+                      {currentMember.memberType === "pure_blooded" ? "Pure Blooded" : "Welcome"}
                     </p>
                   </div>
 
@@ -158,16 +158,16 @@ export default function MemberPortal() {
                     <Calendar className="h-4 w-4 text-gray-500" />
                     <div>
                       <p className="text-sm font-medium text-gray-500">Date of Initiation</p>
-                      <p className="text-sm text-gray-900">{formatDate(foundMember.initiationDate)}</p>
+                      <p className="text-sm text-gray-900">{formatDate(currentMember.initiationDate)}</p>
                     </div>
                   </div>
 
-                  {foundMember.memberType === "welcome" && foundMember.welcomingDate && (
+                  {currentMember.memberType === "welcome" && currentMember.welcomingDate && (
                     <div className="flex items-center space-x-3">
                       <Calendar className="h-4 w-4 text-gray-500" />
                       <div>
                         <p className="text-sm font-medium text-gray-500">Welcoming Date</p>
-                        <p className="text-sm text-gray-900">{formatDate(foundMember.welcomingDate)}</p>
+                        <p className="text-sm text-gray-900">{formatDate(currentMember.welcomingDate)}</p>
                       </div>
                     </div>
                   )}
@@ -186,7 +186,7 @@ export default function MemberPortal() {
             </CardHeader>
             <CardContent>
               {(() => {
-                const status = getPaymentStatus(foundMember);
+                const status = getPaymentStatus(currentMember);
                 const currentMonth = new Date().toLocaleDateString('en-US', { 
                   month: 'long', 
                   year: 'numeric' 
@@ -254,26 +254,7 @@ export default function MemberPortal() {
               )}
             </CardContent>
           </Card>
-        </div>
-      )}
-
-      {searchQuery && !foundMember && (
-        <Card>
-          <CardContent className="py-8 text-center">
-            <User className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Member Not Found</h3>
-            <p className="text-gray-600 mb-4">
-              {searchMode === "batch" 
-                ? "No member found with that batch number. Please check and try again."
-                : "No member found with that name. Please check the spelling and try again."
-              }
-            </p>
-            <Button variant="outline" onClick={clearSearch}>
-              Try Again
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+      </div>
     </div>
   );
 }
