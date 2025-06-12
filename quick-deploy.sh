@@ -72,28 +72,8 @@ PGPASSWORD=rahugan2018
 PGDATABASE=tgp_dues_db
 EOF
 
-# Create PM2 config
-cat > ecosystem.config.js << EOF
-module.exports = {
-  apps: [{
-    name: 'tgp-dues',
-    script: 'server/index.ts',
-    interpreter: 'npx',
-    interpreter_args: 'tsx',
-    instances: 1,
-    autorestart: true,
-    watch: false,
-    max_memory_restart: '1G',
-    env: {
-      NODE_ENV: 'production',
-      PORT: 5000
-    }
-  }]
-}
-EOF
-
-# Start with PM2
-pm2 start ecosystem.config.js
+# Start with PM2 directly (no config file needed)
+pm2 start "npx tsx server/index.ts" --name "tgp-dues" --max-memory-restart 1G
 pm2 save
 pm2 startup systemd -u root --hp /root
 
