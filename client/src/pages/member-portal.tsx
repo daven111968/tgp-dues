@@ -85,7 +85,16 @@ export default function MemberPortal() {
     return monthlyStats;
   };
 
-  const monthlyStats = getMonthlyStats();
+  const allMonthlyStats = getMonthlyStats();
+  
+  // Filter statistics based on selected month
+  const filteredPaymentStats = selectedPaymentStatMonth === "all" 
+    ? allMonthlyStats 
+    : allMonthlyStats.filter(stat => {
+        const [year, month] = selectedPaymentStatMonth.split('-').map(Number);
+        const statDate = new Date(stat.month + ' 1, 2024');
+        return statDate.getMonth() === month - 1 && statDate.getFullYear() === year;
+      });
 
   // State for selected month
   const [selectedMemberMonth, setSelectedMemberMonth] = useState(() => {
@@ -123,6 +132,9 @@ export default function MemberPortal() {
   };
 
   const selectedMonthMemberDetails = getMemberPaymentDetailsForMonth(selectedMemberMonth);
+
+  // State for payment statistics month selection
+  const [selectedPaymentStatMonth, setSelectedPaymentStatMonth] = useState("all");
 
   // Calculate payment status
   const getPaymentStatus = (member: Member) => {
@@ -207,10 +219,31 @@ export default function MemberPortal() {
       {/* Monthly Payment Statistics */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <FileText className="h-5 w-5" />
-            <span>Chapter Payment Statistics</span>
-          </CardTitle>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <CardTitle className="flex items-center space-x-2">
+              <FileText className="h-5 w-5" />
+              <span>Chapter Payment Statistics</span>
+            </CardTitle>
+            <Select value={selectedPaymentStatMonth} onValueChange={setSelectedPaymentStatMonth}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Select Period" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Months (12)</SelectItem>
+                {Array.from({ length: 12 }, (_, i) => {
+                  const date = new Date();
+                  date.setMonth(i);
+                  const currentYear = new Date().getFullYear();
+                  const monthValue = `${currentYear}-${String(i + 1).padStart(2, '0')}`;
+                  return (
+                    <SelectItem key={monthValue} value={monthValue}>
+                      {date.toLocaleDateString('en-US', { month: 'long' })} {currentYear}
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">

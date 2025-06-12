@@ -90,8 +90,6 @@ export default function Reports() {
     return monthlyStats;
   };
 
-  const monthlyStats = getMonthlyStats();
-
   // Get detailed member payment status for a specific month
   const getMemberPaymentDetails = (month: number, year: number) => {
     const monthlyPayments = payments.filter(payment => {
@@ -125,6 +123,9 @@ export default function Reports() {
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   });
 
+  // State for selected month for payment statistics
+  const [selectedStatMonth, setSelectedStatMonth] = useState("all");
+
   // Get member details for selected month
   const getSelectedMonthDetails = () => {
     const [year, month] = selectedMemberDetailsMonth.split('-').map(Number);
@@ -136,6 +137,18 @@ export default function Reports() {
   // Get current month details
   const currentDate = new Date();
   const currentMonthDetails = getMemberPaymentDetails(currentDate.getMonth(), currentDate.getFullYear());
+
+  // Get all monthly statistics
+  const allMonthlyStats = getMonthlyStats();
+  
+  // Filter statistics based on selected month
+  const filteredMonthlyStats = selectedStatMonth === "all" 
+    ? allMonthlyStats 
+    : allMonthlyStats.filter(stat => {
+        const [year, month] = selectedStatMonth.split('-').map(Number);
+        const statDate = new Date(stat.month + ' 1, 2024');
+        return statDate.getMonth() === month - 1 && statDate.getFullYear() === year;
+      });
 
   // Calculate monthly summary
   const getMonthlyReport = () => {
@@ -554,10 +567,31 @@ export default function Reports() {
       {/* Monthly Payment Statistics */}
       <Card className="mt-6">
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Calendar className="h-5 w-5" />
-            <span>Chapter Payment Statistics (12 Months)</span>
-          </CardTitle>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <CardTitle className="flex items-center space-x-2">
+              <Calendar className="h-5 w-5" />
+              <span>Chapter Payment Statistics</span>
+            </CardTitle>
+            <Select value={selectedStatMonth} onValueChange={setSelectedStatMonth}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Select Period" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Months (12)</SelectItem>
+                {Array.from({ length: 12 }, (_, i) => {
+                  const date = new Date();
+                  date.setMonth(i);
+                  const currentYear = new Date().getFullYear();
+                  const monthValue = `${currentYear}-${String(i + 1).padStart(2, '0')}`;
+                  return (
+                    <SelectItem key={monthValue} value={monthValue}>
+                      {date.toLocaleDateString('en-US', { month: 'long' })} {currentYear}
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
@@ -573,7 +607,7 @@ export default function Reports() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {monthlyStats.map((stat) => (
+                {filteredMonthlyStats.map((stat) => (
                   <TableRow key={stat.month}>
                     <TableCell className="font-medium">{stat.month}</TableCell>
                     <TableCell className="text-center">{stat.totalMembers}</TableCell>
