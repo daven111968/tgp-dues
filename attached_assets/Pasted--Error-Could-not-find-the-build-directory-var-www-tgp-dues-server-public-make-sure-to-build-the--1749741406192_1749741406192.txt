@@ -1,0 +1,43 @@
+ Error: Could not find the build directory: /var/www/tgp-dues/server/public, make sure to build the client first
+0|tgp-dues |     at serveStatic (/var/www/tgp-dues/server/vite.ts:74:11)
+0|tgp-dues |     at <anonymous> (/var/www/tgp-dues/server/index.ts:56:5)
+0|tgp-dues |
+0|tgp-dues | Node.js v20.19.2
+0|tgp-dues | /var/www/tgp-dues/server/vite.ts:74
+0|tgp-dues |     throw new Error(
+0|tgp-dues |           ^
+0|tgp-dues |
+0|tgp-dues |
+0|tgp-dues | Error: Could not find the build directory: /var/www/tgp-dues/server/public, make sure to build the client first
+0|tgp-dues |     at serveStatic (/var/www/tgp-dues/server/vite.ts:74:11)
+0|tgp-dues |     at <anonymous> (/var/www/tgp-dues/server/index.ts:56:5)
+0|tgp-dues |
+0|tgp-dues | Node.js v20.19.2
+0|tgp-dues | Error: ENOENT: no such file or directory, stat '/var/www/tgp-dues/server/public/index.html'
+0|tgp-dues | Error: ENOENT: no such file or directory, stat '/var/www/tgp-dues/server/public/index.html'
+0|tgp-dues | Error: ENOENT: no such file or directory, stat '/var/www/tgp-dues/server/public/index.html'
+
+/root/.pm2/logs/tgp-dues-out.log last 20 lines:
+0|tgp-dues |     _isServer: false,
+0|tgp-dues |     _redirects: 0,
+0|tgp-dues |     _autoPong: true,
+0|tgp-dues |     _url: 'wss://localhost/v2',
+0|tgp-dues |     _req: null,
+0|tgp-dues |     [Symbol(shapeMode)]: false,
+0|tgp-dues |     [Symbol(kCapture)]: false
+0|tgp-dues |   },
+0|tgp-dues |   [Symbol(kType)]: 'error',
+0|tgp-dues |   [Symbol(kError)]: Error: connect ECONNREFUSED 127.0.0.1:443
+0|tgp-dues |       at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
+0|tgp-dues |     errno: -111,
+0|tgp-dues |     code: 'ECONNREFUSED',
+0|tgp-dues |     syscall: 'connect',
+0|tgp-dues |     address: '127.0.0.1',
+0|tgp-dues |     port: 443
+0|tgp-dues |   },
+0|tgp-dues |   [Symbol(kMessage)]: 'connect ECONNREFUSED 127.0.0.1:443'
+0|tgp-dues | }
+0|tgp-dues | 3:15:20 PM [express] POST /api/auth/login 400 in 6ms :: {"message":"Invalid request"}
+
+0|tgp-dues  | 3:16:07 PM [express] POST /api/auth/login 400 in 2ms :: {"message":"Invalid request"}
+0|tgp-dues  | 3:16:41 PM [express] POST /api/auth/login 400 in 3ms :: {"message":"Invalid request"}
