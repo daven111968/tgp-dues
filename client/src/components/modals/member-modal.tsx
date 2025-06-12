@@ -35,7 +35,7 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
       setName(member.name);
       setAlexisName(member.alexisName || "");
       setAddress(member.address);
-      setBatchNumber(member.batchNumber);
+      setBatchNumber(member.batchNumber || "");
       setBatchName(member.batchName || "");
       setInitiationDate(member.initiationDate ? new Date(member.initiationDate).toISOString().split('T')[0] : "");
       setMemberType(member.memberType || "pure_blooded");
@@ -59,7 +59,7 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
       name: string;
       alexisName?: string;
       address: string;
-      batchNumber: string;
+      batchNumber?: string;
       batchName?: string;
       initiationDate: string;
       memberType: string;
@@ -122,10 +122,21 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!name || !address || !batchNumber || !initiationDate) {
+    // Validate required fields based on member type
+    if (!name || !address || !initiationDate) {
       toast({
         title: "Error",
         description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Batch number is required for pure blooded members only
+    if (memberType === "pure_blooded" && !batchNumber) {
+      toast({
+        title: "Error",
+        description: "Batch number is required for pure blooded members",
         variant: "destructive",
       });
       return;
@@ -145,7 +156,7 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
       name: name.trim(),
       alexisName: alexisName.trim() || undefined,
       address: address.trim(),
-      batchNumber: batchNumber.trim(),
+      batchNumber: memberType === "pure_blooded" ? batchNumber.trim() : undefined,
       batchName: batchName.trim() || undefined,
       initiationDate: initiationDate,
       memberType: memberType,
@@ -215,26 +226,30 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
             />
           </div>
           
-          <div>
-            <Label htmlFor="batchNumber">Batch Number *</Label>
-            <Input
-              id="batchNumber"
-              value={batchNumber}
-              onChange={(e) => setBatchNumber(e.target.value)}
-              placeholder="Batch-2024"
-              required
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="batchName">Batch Name</Label>
-            <Input
-              id="batchName"
-              value={batchName}
-              onChange={(e) => setBatchName(e.target.value)}
-              placeholder="Enter batch name (optional)"
-            />
-          </div>
+          {memberType === "pure_blooded" && (
+            <>
+              <div>
+                <Label htmlFor="batchNumber">Batch Number *</Label>
+                <Input
+                  id="batchNumber"
+                  value={batchNumber}
+                  onChange={(e) => setBatchNumber(e.target.value)}
+                  placeholder="Batch-2024"
+                  required
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="batchName">Batch Name</Label>
+                <Input
+                  id="batchName"
+                  value={batchName}
+                  onChange={(e) => setBatchName(e.target.value)}
+                  placeholder="Enter batch name (optional)"
+                />
+              </div>
+            </>
+          )}
           
           <div>
             <Label htmlFor="initiationDate">Date of Initiation *</Label>
