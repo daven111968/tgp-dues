@@ -234,13 +234,14 @@ export default function Settings() {
           member.name,
           member.batchNumber || 'N/A',
           member.address,
+          new Date(member.initiationDate).toLocaleDateString(),
           member.status,
           new Date(member.joinedAt).toLocaleDateString()
         ]);
         
         autoTable(doc, {
           startY: yPos + 10,
-          head: [['Name', 'Batch Number', 'Address', 'Status', 'Joined Date']],
+          head: [['Name', 'Batch Number', 'Address', 'Initiation Date', 'Status', 'Joined Date']],
           body: memberTableData,
           theme: 'striped',
           styles: { fontSize: 8 },

@@ -112,7 +112,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/members/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const memberData = insertMemberSchema.partial().parse(req.body);
+      
+      // Convert initiation date string to Date object if provided
+      const requestBody = {
+        ...req.body,
+        initiationDate: req.body.initiationDate ? new Date(req.body.initiationDate) : undefined
+      };
+      
+      const memberData = insertMemberSchema.partial().parse(requestBody);
       
       const updatedMember = await storage.updateMember(id, memberData);
       
