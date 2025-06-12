@@ -11,6 +11,8 @@ import PaymentModal from "@/components/modals/payment-modal";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Payment, Member } from "@shared/schema";
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 export default function Payments() {
   const [search, setSearch] = useState("");
@@ -135,37 +137,74 @@ export default function Payments() {
       }))
     };
 
-    // Create comprehensive CSV with summary
-    const csvContent = [
-      `"${reportData.reportTitle}"`,
-      `"Period: ${reportData.period}"`,
-      `"Generated: ${reportData.generatedDate}"`,
-      `"Total Payments: ${reportData.summary.totalPayments}"`,
-      `"Total Amount: ₱${reportData.summary.totalAmount.toLocaleString()}"`,
-      `"Average Payment: ₱${reportData.summary.averagePayment.toLocaleString()}"`,
-      `"Unique Members: ${reportData.summary.uniqueMembers}"`,
-      `"Date Range: ${reportData.summary.dateRange.earliest ? formatDate(reportData.summary.dateRange.earliest) : 'N/A'} to ${reportData.summary.dateRange.latest ? formatDate(reportData.summary.dateRange.latest) : 'N/A'}"`,
-      "",
-      "Payment Details:",
-      "ID,Member Name,Amount,Payment Date,Month/Year,Notes,Recorded At",
-      ...reportData.payments.map(p => 
-        `${p.id},"${p.memberName}","${p.formattedAmount}","${p.paymentDate}","${p.monthYear}","${p.notes}","${p.recordedAt}"`
-      )
-    ].join("\n");
+    // Create PDF document
+    const doc = new jsPDF();
     
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
+    // Set up the document
+    doc.setFontSize(18);
+    doc.setFont("helvetica", "bold");
+    doc.text("TGP Rahugan CBC Chapter", 20, 20);
     
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `TGP-Payment-Report-${monthFilter ? monthFilter.replace(/\s+/g, '-') : 'All'}-${new Date().toISOString().split('T')[0]}.csv`;
-    link.click();
+    doc.setFontSize(16);
+    doc.text("Monthly Payment Report", 20, 30);
     
-    URL.revokeObjectURL(url);
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Period: ${reportData.period}`, 20, 45);
+    doc.text(`Generated: ${reportData.generatedDate}`, 20, 52);
+    
+    // Summary section
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("Summary", 20, 70);
+    
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Total Payments: ${reportData.summary.totalPayments}`, 20, 80);
+    doc.text(`Total Amount: ₱${reportData.summary.totalAmount.toLocaleString()}`, 20, 87);
+    doc.text(`Average Payment: ₱${reportData.summary.averagePayment.toLocaleString()}`, 20, 94);
+    doc.text(`Unique Members: ${reportData.summary.uniqueMembers}`, 20, 101);
+    
+    const earliestDate = reportData.summary.dateRange.earliest ? formatDate(reportData.summary.dateRange.earliest) : 'N/A';
+    const latestDate = reportData.summary.dateRange.latest ? formatDate(reportData.summary.dateRange.latest) : 'N/A';
+    doc.text(`Date Range: ${earliestDate} to ${latestDate}`, 20, 108);
+    
+    // Payment details table
+    const tableData = reportData.payments.map(payment => [
+      payment.id.toString(),
+      payment.memberName,
+      payment.formattedAmount,
+      payment.paymentDate,
+      payment.monthYear,
+      payment.notes.length > 30 ? payment.notes.substring(0, 30) + "..." : payment.notes
+    ]);
+    
+    autoTable(doc, {
+      head: [['ID', 'Member Name', 'Amount', 'Payment Date', 'Month/Year', 'Notes']],
+      body: tableData,
+      startY: 125,
+      styles: {
+        fontSize: 9,
+        cellPadding: 3,
+      },
+      headStyles: {
+        fillColor: [41, 128, 185],
+        textColor: 255,
+        fontStyle: 'bold',
+      },
+      alternateRowStyles: {
+        fillColor: [245, 245, 245],
+      },
+      margin: { top: 125 },
+    });
+    
+    // Save the PDF
+    const fileName = `TGP-Payment-Report-${monthFilter ? monthFilter.replace(/\s+/g, '-') : 'All'}-${new Date().toISOString().split('T')[0]}.pdf`;
+    doc.save(fileName);
 
     toast({
       title: "Success",
-      description: "Comprehensive monthly payment report exported successfully",
+      description: "PDF payment report exported successfully",
     });
   };
 
@@ -307,7 +346,7 @@ export default function Payments() {
               disabled={filteredPayments.length === 0}
             >
               <Download className="h-4 w-4" />
-              <span>Export</span>
+              <span>Export PDF</span>
             </Button>
           </div>
         </CardContent>
