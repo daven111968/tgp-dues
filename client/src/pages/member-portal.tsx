@@ -565,7 +565,7 @@ export default function MemberPortal() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {currentMonthMemberDetails
+                    {selectedMonthMemberDetails
                       .sort((a, b) => {
                         const statusOrder = { paid: 0, partial: 1, pending: 2 } as const;
                         const statusA = statusOrder[a.status as keyof typeof statusOrder] ?? 3;
