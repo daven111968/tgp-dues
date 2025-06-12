@@ -12,6 +12,7 @@ import Payments from "@/pages/payments";
 import Activities from "@/pages/activities";
 import Reports from "@/pages/reports";
 import Settings from "@/pages/settings";
+import MemberPortal from "@/pages/member-portal";
 import Sidebar from "@/components/layout/sidebar";
 import MobileHeader from "@/components/layout/mobile-header";
 import NotFound from "@/pages/not-found";
@@ -40,6 +41,7 @@ function AuthenticatedApp() {
           <Route path="/activities" component={() => <Activities />} />
           <Route path="/reports" component={() => <Reports />} />
           <Route path="/settings" component={() => <Settings />} />
+          <Route path="/member-portal" component={() => <MemberPortal />} />
           <Route component={NotFound} />
         </Switch>
       </div>

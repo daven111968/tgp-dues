@@ -94,14 +94,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const memberData = insertMemberSchema.parse(requestBody);
       
-      // Check if batch number already exists
-      const existingMember = await storage.getMemberByBatchNumber(memberData.batchNumber);
-      if (existingMember) {
-        return res.status(400).json({ message: "Batch number already exists" });
+      // Check if batch number already exists (only for pure blooded members)
+      if (memberData.batchNumber) {
+        const existingMember = await storage.getMemberByBatchNumber(memberData.batchNumber);
+        if (existingMember) {
+          return res.status(400).json({ error: "A member with this batch number already exists" });
+        }
       }
       
-      const member = await storage.createMember(memberData);
-      res.status(201).json(member);
+      const newMember = await storage.createMember(memberData);
+      res.status(201).json(newMember);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid member data", errors: error.errors });

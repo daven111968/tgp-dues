@@ -1,4 +1,4 @@
-import { Users, BarChart3, CreditCard, Settings, Gauge, Calendar } from "lucide-react";
+import { Users, BarChart3, CreditCard, Settings, Gauge, Calendar, UserCheck } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";

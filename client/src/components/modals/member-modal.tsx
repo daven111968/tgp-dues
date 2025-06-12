@@ -92,7 +92,7 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
       name: string;
       alexisName?: string;
       address: string;
-      batchNumber: string;
+      batchNumber?: string;
       batchName?: string;
       initiationDate: string;
       memberType: string;
