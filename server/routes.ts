@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertMemberSchema, insertPaymentSchema, insertChapterInfoSchema, insertActivitySchema, insertContributionSchema } from "@shared/schema";
+import { insertMemberSchema, insertPaymentSchema, insertChapterInfoSchema, insertActivitySchema, insertContributionSchema, insertUserSchema } from "@shared/schema";
 import { z } from "zod";
 
 const loginSchema = z.object({
@@ -23,6 +23,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ user: { id: user.id, username: user.username, name: user.name, position: user.position } });
     } catch (error) {
       res.status(400).json({ message: "Invalid request" });
+    }
+  });
+
+  // User account update endpoint
+  app.patch("/api/users/current", async (req, res) => {
+    try {
+      // For simplicity, we'll assume the user ID is 1 (the default admin user)
+      // In a real app, you'd get this from session/JWT
+      const userId = 1;
+      
+      const userUpdateSchema = insertUserSchema.partial().omit({ password: true });
+      const userData = userUpdateSchema.parse(req.body);
+      
+      const updatedUser = await storage.updateUser(userId, userData);
+      
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json({ 
+        user: { 
+          id: updatedUser.id, 
+          username: updatedUser.username, 
+          name: updatedUser.name, 
+          position: updatedUser.position 
+        } 
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid user data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update user account" });
     }
   });
 

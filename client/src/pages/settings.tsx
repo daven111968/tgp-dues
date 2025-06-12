@@ -147,13 +147,17 @@ export default function Settings() {
       if (!response.ok) throw new Error('Failed to update account info');
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users/me"] });
+    onSuccess: (response) => {
+      // Update the user context with new data
+      const updatedUser = response.user;
+      localStorage.setItem('user', JSON.stringify(updatedUser));
       setEditingAccount(false);
       toast({
         title: "Success",
         description: "Account information updated successfully.",
       });
+      // Force a page refresh to update the auth context
+      window.location.reload();
     },
     onError: () => {
       toast({
