@@ -45,42 +45,55 @@ export default function MemberPortal() {
 
   // Calculate monthly statistics for all members
   const getMonthlyStats = () => {
-    const currentDate = new Date();
     const monthlyStats = [];
     
-    // Get stats for last 6 months
-    for (let i = 5; i >= 0; i--) {
-      const targetDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
-      const month = targetDate.getMonth();
-      const year = targetDate.getFullYear();
-      
-      const monthlyPayments = payments.filter(payment => {
-        const paymentDate = new Date(payment.paymentDate);
-        return paymentDate.getMonth() === month && paymentDate.getFullYear() === year;
-      });
-      
-      // Group payments by member for this month
-      const memberPaymentTotals = new Map();
-      monthlyPayments.forEach(payment => {
-        const current = memberPaymentTotals.get(payment.memberId) || 0;
-        memberPaymentTotals.set(payment.memberId, current + parseFloat(payment.amount));
-      });
-      
-      // Count members who paid full amount (≥100)
-      const paidMembers = Array.from(memberPaymentTotals.values()).filter(total => total >= 100).length;
-      const partialMembers = Array.from(memberPaymentTotals.values()).filter(total => total > 0 && total < 100).length;
-      const totalAmount = monthlyPayments.reduce((sum, payment) => sum + parseFloat(payment.amount), 0);
-      
-      monthlyStats.push({
-        month: targetDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
-        totalMembers: members.length,
-        paidMembers,
-        partialMembers,
-        pendingMembers: members.length - paidMembers - partialMembers,
-        totalAmount: totalAmount,
-        paymentRate: members.length > 0 ? ((paidMembers / members.length) * 100) : 0
-      });
-    }
+    // Get available years from payment data
+    const paymentYears = payments.map(payment => new Date(payment.paymentDate).getFullYear());
+    const yearSet = new Set(paymentYears);
+    const uniqueYears: number[] = [];
+    yearSet.forEach(year => uniqueYears.push(year));
+    uniqueYears.sort((a, b) => a - b);
+    
+    // If no payments, use current year
+    const currentYear = new Date().getFullYear();
+    const availableYears = uniqueYears.length > 0 ? uniqueYears : [currentYear];
+    
+    // Generate stats for all months in all available years
+    availableYears.forEach(year => {
+      for (let month = 0; month < 12; month++) {
+        const targetDate = new Date(year, month, 1);
+        
+        const monthlyPayments = payments.filter(payment => {
+          const paymentDate = new Date(payment.paymentDate);
+          return paymentDate.getMonth() === month && paymentDate.getFullYear() === year;
+        });
+        
+        // Only include months that have payments
+        if (monthlyPayments.length > 0) {
+          // Group payments by member for this month
+          const memberPaymentTotals = new Map();
+          monthlyPayments.forEach(payment => {
+            const current = memberPaymentTotals.get(payment.memberId) || 0;
+            memberPaymentTotals.set(payment.memberId, current + parseFloat(payment.amount));
+          });
+          
+          // Count members who paid full amount (≥100)
+          const paidMembers = Array.from(memberPaymentTotals.values()).filter(total => total >= 100).length;
+          const partialMembers = Array.from(memberPaymentTotals.values()).filter(total => total > 0 && total < 100).length;
+          const totalAmount = monthlyPayments.reduce((sum, payment) => sum + parseFloat(payment.amount), 0);
+          
+          monthlyStats.push({
+            month: targetDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+            totalMembers: members.length,
+            paidMembers,
+            unpaidMembers: members.length - paidMembers - partialMembers,
+            paymentRate: members.length > 0 ? Math.round((paidMembers / members.length) * 100) : 0,
+            totalAmount,
+            partialMembers
+          });
+        }
+      }
+    });
     
     return monthlyStats;
   };
