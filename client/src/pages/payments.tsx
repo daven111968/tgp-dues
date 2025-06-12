@@ -35,7 +35,7 @@ export default function Payments() {
       const date = new Date(payment.paymentDate);
       return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
     });
-    return [...new Set(months)].sort();
+    return Array.from(new Set(months)).sort();
   };
 
   // Filter payments based on search and month
@@ -47,7 +47,7 @@ export default function Payments() {
     
     if (!matchesSearch) return false;
     
-    if (!monthFilter) return true;
+    if (!monthFilter || monthFilter === "all") return true;
     
     const paymentMonth = new Date(payment.paymentDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
     return paymentMonth === monthFilter;
@@ -56,18 +56,18 @@ export default function Payments() {
   // Calculate total amount for filtered payments
   const totalAmount = filteredPayments.reduce((sum, payment) => sum + parseFloat(payment.amount), 0);
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+  const formatDate = (date: string | Date) => {
+    return new Date(date).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric'
     });
   };
 
-  const formatTime = (dateString: string) => {
-    const date = new Date(dateString);
+  const formatTime = (date: string | Date) => {
+    const dateObj = new Date(date);
     const now = new Date();
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    const diffInHours = Math.floor((now.getTime() - dateObj.getTime()) / (1000 * 60 * 60));
     
     if (diffInHours < 1) return "Just now";
     if (diffInHours < 24) return `${diffInHours} hours ago`;
@@ -164,7 +164,7 @@ export default function Payments() {
                 <SelectValue placeholder="All Months" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Months</SelectItem>
+                <SelectItem value="all">All Months</SelectItem>
                 {getUniqueMonths().map(month => (
                   <SelectItem key={month} value={month}>{month}</SelectItem>
                 ))}

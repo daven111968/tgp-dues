@@ -29,7 +29,7 @@ export default function Reports() {
   // Get available years from payments
   const getAvailableYears = () => {
     const years = payments.map(payment => new Date(payment.paymentDate).getFullYear());
-    return [...new Set(years)].sort((a, b) => b - a);
+    return Array.from(new Set(years)).sort((a, b) => b - a);
   };
 
   // Filter payments by selected month and year
