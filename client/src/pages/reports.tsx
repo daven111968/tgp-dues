@@ -39,8 +39,8 @@ export default function Reports() {
       const paymentYear = paymentDate.getFullYear();
       const paymentMonth = paymentDate.getMonth();
       
-      if (selectedYear && paymentYear !== parseInt(selectedYear)) return false;
-      if (selectedMonth && paymentMonth !== parseInt(selectedMonth)) return false;
+      if (selectedYear && selectedYear !== "all" && paymentYear !== parseInt(selectedYear)) return false;
+      if (selectedMonth && selectedMonth !== "all" && paymentMonth !== parseInt(selectedMonth)) return false;
       
       return true;
     });
@@ -189,7 +189,7 @@ export default function Reports() {
                 <SelectValue placeholder="Select Year" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Years</SelectItem>
+                <SelectItem value="all">All Years</SelectItem>
                 {getAvailableYears().map(year => (
                   <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
                 ))}
@@ -200,7 +200,7 @@ export default function Reports() {
                 <SelectValue placeholder="Select Month" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Months</SelectItem>
+                <SelectItem value="all">All Months</SelectItem>
                 {Array.from({ length: 12 }, (_, i) => (
                   <SelectItem key={i} value={i.toString()}>
                     {new Date(2000, i).toLocaleDateString('en-US', { month: 'long' })}
