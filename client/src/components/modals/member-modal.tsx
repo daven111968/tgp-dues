@@ -21,6 +21,7 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
   const [address, setAddress] = useState("");
   const [batchNumber, setBatchNumber] = useState("");
   const [batchName, setBatchName] = useState("");
+  const [initiationDate, setInitiationDate] = useState("");
   const [status, setStatus] = useState("active");
   
   const { toast } = useToast();

@@ -17,6 +17,7 @@ export const members = pgTable("members", {
   address: text("address").notNull(),
   batchNumber: text("batch_number").notNull().unique(),
   batchName: text("batch_name"),
+  initiationDate: timestamp("initiation_date").notNull(),
   status: text("status").notNull().default("active"), // active, inactive
   joinedAt: timestamp("joined_at").notNull().defaultNow(),
 });
