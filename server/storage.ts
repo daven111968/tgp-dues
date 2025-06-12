@@ -63,8 +63,8 @@ export class DatabaseStorage implements IStorage {
       await this.createUser({
         username: "treasurer",
         password: "password123",
-        name: "Chapter Treasurer",
-        position: "Treasurer"
+        name: "Chapter Master Keeper of the Chest",
+        position: "Master Keeper of the Chest"
       });
 
       // Create sample members

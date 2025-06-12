@@ -293,7 +293,7 @@ export default function Payments() {
                 <p className="text-3xl font-bold text-green-600">₱{totalAmount.toLocaleString()}</p>
               </div>
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <DollarSign className="text-green-600 text-xl" />
+                <span className="text-green-600 text-xl font-bold">₱</span>
               </div>
             </div>
           </CardContent>
@@ -309,7 +309,7 @@ export default function Payments() {
                 </p>
               </div>
               <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                <DollarSign className="text-gray-600 text-xl" />
+                <span className="text-gray-600 text-xl font-bold">₱</span>
               </div>
             </div>
           </CardContent>
