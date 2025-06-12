@@ -253,6 +253,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete("/api/activities/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteActivity(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Activity not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete activity" });
+    }
+  });
+
   // Contributions routes
   app.get("/api/contributions", async (req, res) => {
     try {
@@ -273,6 +288,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid contribution data", errors: error.errors });
       }
       res.status(500).json({ message: "Failed to create contribution" });
+    }
+  });
+
+  app.delete("/api/contributions/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteContribution(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Contribution not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete contribution" });
     }
   });
 

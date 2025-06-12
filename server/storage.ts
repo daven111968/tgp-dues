@@ -39,11 +39,13 @@ export interface IStorage {
   getActivity(id: number): Promise<Activity | undefined>;
   createActivity(activity: InsertActivity): Promise<Activity>;
   updateActivity(id: number, activity: Partial<InsertActivity>): Promise<Activity | undefined>;
+  deleteActivity(id: number): Promise<boolean>;
   
   // Contribution methods
   getContributions(): Promise<Array<Contribution & { memberName: string; activityName: string }>>;
   getContributionsByActivity(activityId: number): Promise<Array<Contribution & { memberName: string }>>;
   createContribution(contribution: InsertContribution): Promise<Contribution>;
+  deleteContribution(id: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -321,6 +323,20 @@ export class DatabaseStorage implements IStorage {
     return activity || undefined;
   }
 
+  async deleteActivity(id: number): Promise<boolean> {
+    try {
+      // First delete all contributions related to this activity
+      await db.delete(contributions).where(eq(contributions.activityId, id));
+      
+      // Then delete the activity
+      const result = await db.delete(activities).where(eq(activities.id, id));
+      return (result.rowCount || 0) > 0;
+    } catch (error) {
+      console.error('Error deleting activity:', error);
+      return false;
+    }
+  }
+
   // Contribution methods
   async getContributions(): Promise<Array<Contribution & { memberName: string; activityName: string }>> {
     const result = await db
@@ -378,6 +394,37 @@ export class DatabaseStorage implements IStorage {
       .where(eq(activities.id, insertContribution.activityId));
 
     return contribution;
+  }
+
+  async deleteContribution(id: number): Promise<boolean> {
+    try {
+      // Get the contribution to subtract its amount from activity
+      const [contribution] = await db.select().from(contributions).where(eq(contributions.id, id));
+      
+      if (!contribution) {
+        return false;
+      }
+
+      // Delete the contribution
+      const result = await db.delete(contributions).where(eq(contributions.id, id));
+      
+      if ((result.rowCount || 0) > 0) {
+        // Update activity current amount by subtracting the contribution
+        await db
+          .update(activities)
+          .set({
+            currentAmount: sql`${activities.currentAmount} - ${contribution.amount}`
+          })
+          .where(eq(activities.id, contribution.activityId));
+        
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Error deleting contribution:', error);
+      return false;
+    }
   }
 }
 
