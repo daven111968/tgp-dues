@@ -691,8 +691,12 @@ import express from 'express';
 import path from 'path';
 import pg from 'pg';
 import cors from 'cors';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
 const { Pool } = pg;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 5000;
