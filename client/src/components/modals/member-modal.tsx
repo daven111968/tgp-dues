@@ -17,8 +17,8 @@ interface MemberModalProps {
 
 export default function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
   const [name, setName] = useState("");
-  const [aliasName, setAliasName] = useState("");
-  const [email, setEmail] = useState("");
+  const [alexisName, setAlexisName] = useState("");
+  const [address, setAddress] = useState("");
   const [batchNumber, setBatchNumber] = useState("");
   const [batchName, setBatchName] = useState("");
   const [status, setStatus] = useState("active");
@@ -30,15 +30,15 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
   useEffect(() => {
     if (member) {
       setName(member.name);
-      setAliasName(member.aliasName || "");
-      setEmail(member.email);
+      setAlexisName(member.alexisName || "");
+      setAddress(member.address);
       setBatchNumber(member.batchNumber);
       setBatchName(member.batchName || "");
       setStatus(member.status);
     } else {
       setName("");
-      setAliasName("");
-      setEmail("");
+      setAlexisName("");
+      setAddress("");
       setBatchNumber("");
       setBatchName("");
       setStatus("active");
@@ -107,7 +107,7 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!name || !email || !batchNumber) {
+    if (!name || !address || !batchNumber) {
       toast({
         title: "Error",
         description: "Please fill in all required fields",
@@ -118,8 +118,8 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
 
     const memberData = {
       name: name.trim(),
-      aliasName: aliasName.trim() || undefined,
-      email: email.trim(),
+      alexisName: alexisName.trim() || undefined,
+      address: address.trim(),
       batchNumber: batchNumber.trim(),
       batchName: batchName.trim() || undefined,
       status,
