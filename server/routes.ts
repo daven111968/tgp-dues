@@ -19,7 +19,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (accountType === 'admin') {
         const user = await storage.getUserByUsername(username);
         
-        if (!user || user.password !== password) {
+        if (!user || user.password !== password || user.accountType !== 'admin') {
           return res.status(401).json({ message: "Invalid credentials" });
         }
         
