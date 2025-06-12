@@ -7,6 +7,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Download, Calendar, TrendingUp, Users, DollarSign } from "lucide-react";
 import type { Payment, Member } from "@shared/schema";
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 export default function Reports() {
   const [selectedMonth, setSelectedMonth] = useState("");
@@ -137,23 +139,126 @@ export default function Reports() {
   };
 
   const exportReport = () => {
-    const reportData = {
-      summary: monthlyReport,
-      trends: paymentTrends,
-      memberSummary: memberSummary.slice(0, 10),
-      generatedAt: new Date().toISOString()
-    };
+    const doc = new jsPDF();
+    const today = new Date();
+    const filteredPayments = getFilteredPayments();
     
-    const dataStr = JSON.stringify(reportData, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
+    // Header
+    doc.setFontSize(20);
+    doc.setTextColor(40, 40, 40);
+    doc.text('Financial Report', 105, 25, { align: 'center' });
     
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `dues-report-${new Date().toISOString().split('T')[0]}.json`;
-    link.click();
+    // Date and filters
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    const periodText = selectedYear === "all" ? "All Years" : 
+      (selectedMonth === "all" || !selectedMonth) ? selectedYear : 
+      `${new Date(0, parseInt(selectedMonth)).toLocaleString('default', { month: 'long' })} ${selectedYear}`;
+    doc.text(`Report Period: ${periodText}`, 105, 35, { align: 'center' });
+    doc.text(`Generated: ${today.toLocaleDateString()}`, 105, 42, { align: 'center' });
     
-    URL.revokeObjectURL(url);
+    let yPos = 55;
+    
+    // Summary Statistics
+    doc.setFontSize(14);
+    doc.setTextColor(40, 40, 40);
+    doc.text('Summary Statistics', 20, yPos);
+    yPos += 10;
+    
+    const summaryData = [
+      ['Total Payments', monthlyReport.totalPayments.toString()],
+      ['Total Amount', `₱${monthlyReport.totalAmount.toLocaleString()}`],
+      ['Unique Payers', monthlyReport.uniquePayers.toString()],
+      ['Average Payment', `₱${monthlyReport.averagePayment.toLocaleString()}`]
+    ];
+    
+    autoTable(doc, {
+      startY: yPos,
+      head: [['Metric', 'Value']],
+      body: summaryData,
+      theme: 'grid',
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [41, 128, 185] },
+      margin: { left: 20, right: 20 }
+    });
+    
+    yPos = (doc as any).lastAutoTable.finalY + 20;
+    
+    // Payment Details Table
+    if (filteredPayments.length > 0) {
+      doc.setFontSize(14);
+      doc.text('Payment Details', 20, yPos);
+      yPos += 10;
+      
+      const paymentTableData = filteredPayments.map(payment => {
+        const member = members?.find(m => m.id === payment.memberId);
+        return [
+          member?.name || 'Unknown Member',
+          `₱${parseFloat(payment.amount).toLocaleString()}`,
+          new Date(payment.paymentDate).toLocaleDateString(),
+          payment.notes || 'No notes'
+        ];
+      });
+      
+      autoTable(doc, {
+        startY: yPos,
+        head: [['Member Name', 'Amount', 'Payment Date', 'Notes']],
+        body: paymentTableData,
+        theme: 'striped',
+        styles: { fontSize: 8 },
+        headStyles: { fillColor: [41, 128, 185] },
+        margin: { left: 20, right: 20 }
+      });
+      
+      yPos = (doc as any).lastAutoTable.finalY + 20;
+    }
+    
+    // Member Summary (Top 10)
+    if (memberSummary.length > 0) {
+      // Check if we need a new page
+      if (yPos > 250) {
+        doc.addPage();
+        yPos = 30;
+      }
+      
+      doc.setFontSize(14);
+      doc.text('Top Contributing Members', 20, yPos);
+      yPos += 10;
+      
+      const memberTableData = memberSummary.slice(0, 10).map((summary: any) => {
+        const member = members?.find(m => m.id === summary.memberId);
+        return [
+          member?.name || 'Unknown Member',
+          summary.paymentCount.toString(),
+          `₱${summary.totalAmount.toLocaleString()}`,
+          summary.lastPayment ? new Date(summary.lastPayment).toLocaleDateString() : 'Never'
+        ];
+      });
+      
+      autoTable(doc, {
+        startY: yPos,
+        head: [['Member Name', 'Payments', 'Total Amount', 'Last Payment']],
+        body: memberTableData,
+        theme: 'striped',
+        styles: { fontSize: 8 },
+        headStyles: { fillColor: [41, 128, 185] },
+        margin: { left: 20, right: 20 }
+      });
+    }
+    
+    // Footer
+    const pageCount = doc.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      doc.text(`Page ${i} of ${pageCount}`, 105, 285, { align: 'center' });
+      doc.text('Tau Gamma Phi Rahugan CBC Chapter - Financial Report', 105, 290, { align: 'center' });
+    }
+    
+    // Save the PDF
+    const filename = `financial-report-${today.toISOString().split('T')[0]}.pdf`;
+    doc.save(filename);
   };
 
   if (paymentsLoading) {
