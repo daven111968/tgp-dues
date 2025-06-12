@@ -21,8 +21,11 @@ export default function Login() {
     setError("");
     
     try {
+      console.log('Attempting login with:', { username, accountType: 'admin' });
       await login(username, password);
+      console.log('Login completed successfully');
     } catch (err: any) {
+      console.error('Login failed:', err);
       setError(err.message || "Invalid credentials");
     }
   };
@@ -51,10 +54,12 @@ export default function Login() {
               <Label htmlFor="username">Officer ID</Label>
               <Input
                 id="username"
+                name="username"
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Enter your officer ID"
+                autoComplete="username"
                 required
               />
             </div>
@@ -63,10 +68,12 @@ export default function Login() {
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
+                name="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
+                autoComplete="current-password"
                 required
               />
             </div>
