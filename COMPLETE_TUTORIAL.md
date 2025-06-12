@@ -226,7 +226,7 @@ mkdir -p /root/backups
 pg_dump -U rahuganmkc -h localhost tgp_dues_db > /root/backups/db_$DATE.sql
 
 # Application backup
-tar -czf /root/backups/app_$DATE.tar.gz /var/www/tgp-dues
+tar -czf /root/backups/app_$DATE.tar.gz /root/tgp-dues
 
 # Clean old backups (keep 30 days)
 find /root/backups -name "*.sql" -mtime +30 -delete
@@ -244,7 +244,7 @@ echo "0 2 * * * /root/backup-tgp.sh" | crontab -
 ### Update Procedure
 ```bash
 # Navigate to application directory
-cd /var/www/tgp-dues
+cd /root/tgp-dues
 
 # Stop application
 pm2 stop tgp-dues

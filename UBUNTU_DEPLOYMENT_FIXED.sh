@@ -21,7 +21,7 @@ BOLD='\033[1m'
 DB_NAME="tgp_dues_db"
 DB_USER="rahuganmkc"
 DB_PASSWORD="rahugan2018"
-APP_DIR="/var/www/tgp-dues"
+APP_DIR="/root/tgp-dues"
 APP_PORT="5000"
 APP_NAME="tgp-dues"
 

@@ -9,7 +9,7 @@ echo "=== TGP Dues Management - Quick Ubuntu Deployment ==="
 DB_USER="rahuganmkc"
 DB_PASSWORD="rahugan2018"
 DB_NAME="tgp_dues_db"
-APP_DIR="/var/www/tgp-dues"
+APP_DIR="/root/tgp-dues"
 
 # Fix Node.js installation
 echo "Step 1: Installing Node.js from NodeSource (fixes conflicts)..."
