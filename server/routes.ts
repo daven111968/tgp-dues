@@ -47,10 +47,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
             accountType: 'member'
           } 
         });
+      } else {
+        return res.status(400).json({ message: "Invalid account type" });
       }
     } catch (error) {
+      console.error('Login error:', error);
       res.status(400).json({ message: "Invalid request" });
     }
+  });
+
+  // Member login endpoint for compatibility
+  app.post("/api/member/login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      if (!username || !password) {
+        return res.status(400).json({ message: "Username and password required" });
+      }
+      
+      const member = await storage.getMemberByUsername(username);
+      
+      if (!member || !member.password || member.password !== password) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      
+      res.json({ 
+        user: { 
+          id: member.id, 
+          username: member.username || username, 
+          name: member.name,
+          accountType: 'member'
+        } 
+      });
+    } catch (error) {
+      console.error('Member login error:', error);
+      res.status(400).json({ message: "Invalid request" });
+    }
+  });
+
+  // Logout endpoint
+  app.post("/api/auth/logout", (req, res) => {
+    res.json({ success: true });
   });
 
   // User account update endpoint
