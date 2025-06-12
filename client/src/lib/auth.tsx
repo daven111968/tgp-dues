@@ -23,8 +23,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
   const loginMutation = useMutation({
-    mutationFn: async ({ username, password }: { username: string; password: string }) => {
-      const response = await apiRequest('POST', '/api/login', { username, password });
+    mutationFn: async ({ username, password, accountType }: { username: string; password: string; accountType: 'admin' | 'member' }) => {
+      const response = await apiRequest('POST', '/api/login', { username, password, accountType });
       return response.json();
     },
     onSuccess: (data) => {
@@ -33,8 +33,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  const login = async (username: string, password: string) => {
-    await loginMutation.mutateAsync({ username, password });
+  const login = async (username: string, password: string, accountType: 'admin' | 'member' = 'admin') => {
+    await loginMutation.mutateAsync({ username, password, accountType });
   };
 
   const logout = () => {

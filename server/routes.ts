@@ -7,20 +7,47 @@ import { z } from "zod";
 const loginSchema = z.object({
   username: z.string(),
   password: z.string(),
+  accountType: z.enum(['admin', 'member']).optional().default('admin'),
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   app.post("/api/login", async (req, res) => {
     try {
-      const { username, password } = loginSchema.parse(req.body);
-      const user = await storage.getUserByUsername(username);
+      const { username, password, accountType } = loginSchema.parse(req.body);
       
-      if (!user || user.password !== password) {
-        return res.status(401).json({ message: "Invalid credentials" });
+      if (accountType === 'admin') {
+        const user = await storage.getUserByUsername(username);
+        
+        if (!user || user.password !== password) {
+          return res.status(401).json({ message: "Invalid credentials" });
+        }
+        
+        res.json({ 
+          user: { 
+            id: user.id, 
+            username: user.username, 
+            name: user.name, 
+            position: user.position,
+            accountType: 'admin'
+          } 
+        });
+      } else if (accountType === 'member') {
+        const member = await storage.getMemberByUsername(username);
+        
+        if (!member || !member.password || member.password !== password) {
+          return res.status(401).json({ message: "Invalid credentials" });
+        }
+        
+        res.json({ 
+          user: { 
+            id: member.id, 
+            username: member.username || username, 
+            name: member.name,
+            accountType: 'member'
+          } 
+        });
       }
-      
-      res.json({ user: { id: user.id, username: user.username, name: user.name, position: user.position } });
     } catch (error) {
       res.status(400).json({ message: "Invalid request" });
     }

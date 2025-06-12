@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { OfflineIndicator } from "@/components/ui/offline-indicator";
 import Login from "@/pages/login";
+import MemberLogin from "@/pages/member-login";
 import Dashboard from "@/pages/dashboard";
 import Members from "@/pages/members";
 import Payments from "@/pages/payments";
@@ -21,9 +22,26 @@ function AuthenticatedApp() {
   const { user } = useAuth();
 
   if (!user) {
-    return <Login />;
+    return (
+      <Switch>
+        <Route path="/member-login" component={() => <MemberLogin />} />
+        <Route component={() => <Login />} />
+      </Switch>
+    );
   }
 
+  // Member-specific view (only access to member portal)
+  if (user.accountType === 'member') {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="container mx-auto px-4 py-8">
+          <MemberPortal />
+        </div>
+      </div>
+    );
+  }
+
+  // Admin view (full dashboard access)
   return (
     <div className="flex h-screen bg-gray-50">
       <Sidebar />

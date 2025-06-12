@@ -79,7 +79,9 @@ export class DatabaseStorage implements IStorage {
           batchNumber: "Batch-2021",
           initiationDate: new Date('2021-03-15'),
           memberType: "pure_blooded",
-          status: "active"
+          status: "active",
+          username: "juan.delacruz",
+          password: "member123"
         },
         {
           name: "Mark Santos",
@@ -87,7 +89,9 @@ export class DatabaseStorage implements IStorage {
           batchNumber: "Batch-2021", 
           initiationDate: new Date('2021-04-20'),
           memberType: "pure_blooded",
-          status: "active"
+          status: "active",
+          username: "mark.santos",
+          password: "member123"
         },
         {
           name: "Paolo Rodriguez",
@@ -95,7 +99,9 @@ export class DatabaseStorage implements IStorage {
           initiationDate: new Date('2022-02-10'),
           memberType: "welcome",
           welcomingDate: new Date('2022-03-01'),
-          status: "active"
+          status: "active",
+          username: "paolo.rodriguez",
+          password: "member123"
         }
       ];
 

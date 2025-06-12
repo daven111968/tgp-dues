@@ -1,19 +1,14 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calendar, CreditCard, User, MapPin, Clock, FileText } from "lucide-react";
+import { Calendar, CreditCard, User, MapPin, Clock, FileText, LogOut } from "lucide-react";
 import { Member, Payment } from "@shared/schema";
+import { useAuth } from "@/lib/auth";
 
 export default function MemberPortal() {
-  const [batchNumber, setBatchNumber] = useState("");
-  const [memberName, setMemberName] = useState("");
-  const [searchMode, setSearchMode] = useState<"batch" | "name">("batch");
-  const [searchQuery, setSearchQuery] = useState("");
+  const { user, logout } = useAuth();
 
   const { data: members = [] } = useQuery<Member[]>({
     queryKey: ['/api/members'],
@@ -23,32 +18,12 @@ export default function MemberPortal() {
     queryKey: ['/api/payments'],
   });
 
-  const handleSearch = () => {
-    if (searchMode === "batch" && batchNumber.trim()) {
-      setSearchQuery(batchNumber.trim());
-    } else if (searchMode === "name" && memberName.trim()) {
-      setSearchQuery(memberName.trim());
-    }
-  };
-
-  const clearSearch = () => {
-    setBatchNumber("");
-    setMemberName("");
-    setSearchQuery("");
-  };
-
-  // Find member based on search
-  const foundMember = searchQuery ? members.find(member => {
-    if (searchMode === "batch") {
-      return member.batchNumber?.toLowerCase() === searchQuery.toLowerCase();
-    } else {
-      return member.name.toLowerCase().includes(searchQuery.toLowerCase());
-    }
-  }) : null;
+  // Find the current logged-in member
+  const currentMember = user ? members.find(member => member.id === user.id) : null;
 
   // Get member's payment history
-  const memberPayments = foundMember ? 
-    payments.filter(payment => payment.memberId === foundMember.id)
+  const memberPayments = currentMember ? 
+    payments.filter(payment => payment.memberId === currentMember.id)
       .sort((a, b) => new Date(b.paymentDate).getTime() - new Date(a.paymentDate).getTime()) 
     : [];
 
@@ -94,82 +69,45 @@ export default function MemberPortal() {
     }
   };
 
+  if (!currentMember) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Member Portal</h1>
+            <p className="text-gray-600">Welcome, {user?.name}</p>
+          </div>
+          <Button onClick={logout} variant="outline" className="flex items-center space-x-2">
+            <LogOut className="h-4 w-4" />
+            <span>Sign Out</span>
+          </Button>
+        </div>
+        
+        <Card>
+          <CardContent className="py-8 text-center">
+            <User className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Member Information Not Found</h3>
+            <p className="text-gray-600">Please contact your chapter treasurer for assistance.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Member Portal</h1>
-          <p className="text-gray-600">Check your monthly dues status</p>
+          <p className="text-gray-600">Welcome, {currentMember.name}</p>
         </div>
+        <Button onClick={logout} variant="outline" className="flex items-center space-x-2">
+          <LogOut className="h-4 w-4" />
+          <span>Sign Out</span>
+        </Button>
       </div>
 
-      {/* Search Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <User className="h-5 w-5" />
-            <span>Find Your Account</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex space-x-4">
-            <Button
-              variant={searchMode === "batch" ? "default" : "outline"}
-              onClick={() => setSearchMode("batch")}
-              className="flex-1"
-            >
-              Search by Batch Number
-            </Button>
-            <Button
-              variant={searchMode === "name" ? "default" : "outline"}
-              onClick={() => setSearchMode("name")}
-              className="flex-1"
-            >
-              Search by Name
-            </Button>
-          </div>
-
-          <div className="space-y-4">
-            {searchMode === "batch" ? (
-              <div>
-                <Label htmlFor="batchNumber">Batch Number</Label>
-                <Input
-                  id="batchNumber"
-                  type="text"
-                  value={batchNumber}
-                  onChange={(e) => setBatchNumber(e.target.value)}
-                  placeholder="Enter your batch number (e.g., Batch-2024)"
-                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                />
-              </div>
-            ) : (
-              <div>
-                <Label htmlFor="memberName">Member Name</Label>
-                <Input
-                  id="memberName"
-                  type="text"
-                  value={memberName}
-                  onChange={(e) => setMemberName(e.target.value)}
-                  placeholder="Enter your full name"
-                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                />
-              </div>
-            )}
-
-            <div className="flex space-x-2">
-              <Button onClick={handleSearch} className="flex-1">
-                Search
-              </Button>
-              <Button variant="outline" onClick={clearSearch}>
-                Clear
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Member Information */}
-      {foundMember && (
         <div className="space-y-6">
           <Card>
             <CardHeader>
