@@ -35,6 +35,7 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
       setAddress(member.address);
       setBatchNumber(member.batchNumber);
       setBatchName(member.batchName || "");
+      setInitiationDate(member.initiationDate ? new Date(member.initiationDate).toISOString().split('T')[0] : "");
       setStatus(member.status);
     } else {
       setName("");
@@ -42,6 +43,7 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
       setAddress("");
       setBatchNumber("");
       setBatchName("");
+      setInitiationDate("");
       setStatus("active");
     }
   }, [member]);
@@ -53,6 +55,7 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
       address: string;
       batchNumber: string;
       batchName?: string;
+      initiationDate: string;
       status: string;
     }) => {
       const response = await apiRequest('POST', '/api/members', memberData);
@@ -83,6 +86,7 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
       address: string;
       batchNumber: string;
       batchName?: string;
+      initiationDate: string;
       status: string;
     }) => {
       const response = await apiRequest('PUT', `/api/members/${member!.id}`, memberData);
@@ -108,7 +112,7 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!name || !address || !batchNumber) {
+    if (!name || !address || !batchNumber || !initiationDate) {
       toast({
         title: "Error",
         description: "Please fill in all required fields",
@@ -123,6 +127,7 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
       address: address.trim(),
       batchNumber: batchNumber.trim(),
       batchName: batchName.trim() || undefined,
+      initiationDate: initiationDate,
       status,
     };
 
@@ -139,6 +144,7 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
     setAddress("");
     setBatchNumber("");
     setBatchName("");
+    setInitiationDate("");
     setStatus("active");
     onClose();
   };
@@ -203,6 +209,17 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
               value={batchName}
               onChange={(e) => setBatchName(e.target.value)}
               placeholder="Enter batch name (optional)"
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="initiationDate">Date of Initiation *</Label>
+            <Input
+              id="initiationDate"
+              type="date"
+              value={initiationDate}
+              onChange={(e) => setInitiationDate(e.target.value)}
+              required
             />
           </div>
           

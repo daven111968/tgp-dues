@@ -85,7 +85,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/members", async (req, res) => {
     try {
-      const memberData = insertMemberSchema.parse(req.body);
+      // Convert initiation date string to Date object
+      const requestBody = {
+        ...req.body,
+        initiationDate: req.body.initiationDate ? new Date(req.body.initiationDate) : undefined
+      };
+      
+      const memberData = insertMemberSchema.parse(requestBody);
       
       // Check if batch number already exists
       const existingMember = await storage.getMemberByBatchNumber(memberData.batchNumber);
