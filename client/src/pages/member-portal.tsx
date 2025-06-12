@@ -3,8 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calendar, CreditCard, User, MapPin, Clock, FileText, LogOut } from "lucide-react";
-import { Member, Payment } from "@shared/schema";
+import { Calendar, CreditCard, User, MapPin, Clock, FileText, LogOut, Activity } from "lucide-react";
+import { Member, Payment, Contribution, Activity as ActivityType } from "@shared/schema";
 import { useAuth } from "@/lib/auth";
 
 export default function MemberPortal() {
@@ -18,6 +18,14 @@ export default function MemberPortal() {
     queryKey: ['/api/payments'],
   });
 
+  const { data: activities = [] } = useQuery<ActivityType[]>({
+    queryKey: ['/api/activities'],
+  });
+
+  const { data: contributions = [] } = useQuery<Array<Contribution & { memberName: string; activityName: string }>>({
+    queryKey: ['/api/contributions'],
+  });
+
   // Find the current logged-in member
   const currentMember = user ? members.find(member => member.id === user.id) : null;
 
@@ -25,6 +33,12 @@ export default function MemberPortal() {
   const memberPayments = currentMember ? 
     payments.filter(payment => payment.memberId === currentMember.id)
       .sort((a, b) => new Date(b.paymentDate).getTime() - new Date(a.paymentDate).getTime()) 
+    : [];
+
+  // Get member's activity contributions
+  const memberContributions = currentMember ? 
+    contributions.filter(contribution => contribution.memberId === currentMember.id)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     : [];
 
   // Calculate monthly statistics for all members
@@ -356,6 +370,96 @@ export default function MemberPortal() {
                   </Table>
                 </div>
               )}
+            </CardContent>
+          </Card>
+
+          {/* Activity Contributions */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Activity className="h-5 w-5" />
+                <span>Activity Contributions</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {memberContributions.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <Activity className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                  <p>No contributions found</p>
+                  <p className="text-sm">Your activity contributions will appear here</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Activity</TableHead>
+                        <TableHead>Amount</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Notes</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {memberContributions.map((contribution) => (
+                        <TableRow key={contribution.id}>
+                          <TableCell className="font-medium">{contribution.activityName}</TableCell>
+                          <TableCell>₱{parseFloat(contribution.amount).toFixed(2)}</TableCell>
+                          <TableCell>{formatDate(contribution.createdAt)}</TableCell>
+                          <TableCell>{contribution.notes || "—"}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Payment & Contribution Summary */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <FileText className="h-5 w-5" />
+                <span>Financial Summary</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-blue-600">Total Dues Paid</p>
+                      <p className="text-2xl font-bold text-blue-900">
+                        ₱{memberPayments.reduce((sum, payment) => sum + parseFloat(payment.amount), 0).toFixed(2)}
+                      </p>
+                    </div>
+                    <CreditCard className="h-8 w-8 text-blue-500" />
+                  </div>
+                </div>
+                
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-green-600">Total Contributions</p>
+                      <p className="text-2xl font-bold text-green-900">
+                        ₱{memberContributions.reduce((sum, contribution) => sum + parseFloat(contribution.amount), 0).toFixed(2)}
+                      </p>
+                    </div>
+                    <Activity className="h-8 w-8 text-green-500" />
+                  </div>
+                </div>
+                
+                <div className="bg-purple-50 p-4 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-purple-600">Payment Count</p>
+                      <p className="text-2xl font-bold text-purple-900">{memberPayments.length}</p>
+                      <p className="text-xs text-purple-600">{memberContributions.length} contributions</p>
+                    </div>
+                    <FileText className="h-8 w-8 text-purple-500" />
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
       </div>
