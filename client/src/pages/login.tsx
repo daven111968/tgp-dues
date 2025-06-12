@@ -87,7 +87,7 @@ export default function Login() {
               </Link>
             </p>
             <p className="text-xs text-gray-500">
-              Contact Chapter President for access credentials
+              Contact Chapter MKC for access credentials
             </p>
           </div>
         </CardContent>
