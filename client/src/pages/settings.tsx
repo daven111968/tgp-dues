@@ -1,28 +1,26 @@
 import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { Separator } from "@/components/ui/separator";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Save, Download, Upload, Settings as SettingsIcon, Users, Bell, Shield, Edit } from "lucide-react";
-import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import type { Member, Payment, ChapterInfo, InsertChapterInfo } from "@shared/schema";
-import { insertChapterInfoSchema, insertUserSchema } from "@shared/schema";
-import { z } from "zod";
+import { useAuth } from "@/lib/auth";
+import { queryClient } from "@/lib/queryClient";
+import { Edit, Save, Download, Upload, Users, Shield, SettingsIcon } from "lucide-react";
+import type { InsertChapterInfo, ChapterInfo, Member, Payment } from "@shared/schema";
 
 // Account info form schema
 const accountInfoSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  username: z.string().min(3, "Username must be at least 3 characters"),
+  username: z.string().min(1, "Username is required"),
   position: z.string().min(1, "Position is required"),
 });
 
@@ -34,22 +32,32 @@ export default function Settings() {
   const [editingChapter, setEditingChapter] = useState(false);
   const [editingAccount, setEditingAccount] = useState(false);
 
-  // Fetch chapter info
+  // Fetch data
   const { data: chapterInfo, isLoading: chapterLoading } = useQuery<ChapterInfo>({
     queryKey: ["/api/chapter-info"],
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: members = [] } = useQuery<Member[]>({
     queryKey: ["/api/members"],
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: payments = [] } = useQuery<Payment[]>({
     queryKey: ["/api/payments"],
+    staleTime: 5 * 60 * 1000,
   });
 
-  // Chapter Info Form
+  // Chapter form
   const chapterForm = useForm<InsertChapterInfo>({
-    resolver: zodResolver(insertChapterInfoSchema),
+    resolver: zodResolver(z.object({
+      chapterName: z.string().min(1, "Chapter name is required"),
+      chapterAddress: z.string().min(1, "Address is required"),
+      contactEmail: z.string().email("Invalid email format"),
+      contactPhone: z.string().min(1, "Phone number is required"),
+      treasurerName: z.string().min(1, "Treasurer name is required"),
+      treasurerEmail: z.string().email("Invalid email format"),
+    })),
     defaultValues: {
       chapterName: "",
       chapterAddress: "",
@@ -60,13 +68,13 @@ export default function Settings() {
     },
   });
 
-  // Account Info Form
+  // Account form
   const accountForm = useForm<AccountInfoFormData>({
     resolver: zodResolver(accountInfoSchema),
     defaultValues: {
-      name: user?.name || "",
-      username: user?.username || "",
-      position: user?.position || "",
+      name: "",
+      username: "",
+      position: "",
     },
   });
 
@@ -74,12 +82,12 @@ export default function Settings() {
   useEffect(() => {
     if (chapterInfo) {
       chapterForm.reset({
-        chapterName: chapterInfo.chapterName,
-        chapterAddress: chapterInfo.chapterAddress,
-        contactEmail: chapterInfo.contactEmail,
-        contactPhone: chapterInfo.contactPhone,
-        treasurerName: chapterInfo.treasurerName,
-        treasurerEmail: chapterInfo.treasurerEmail,
+        chapterName: chapterInfo.chapterName || "",
+        chapterAddress: chapterInfo.chapterAddress || "",
+        contactEmail: chapterInfo.contactEmail || "",
+        contactPhone: chapterInfo.contactPhone || "",
+        treasurerName: chapterInfo.treasurerName || "",
+        treasurerEmail: chapterInfo.treasurerEmail || "",
       });
     }
   }, [chapterInfo, chapterForm]);
@@ -87,9 +95,9 @@ export default function Settings() {
   useEffect(() => {
     if (user) {
       accountForm.reset({
-        name: user.name,
-        username: user.username,
-        position: user.position,
+        name: user.name || "",
+        username: user.username || "",
+        position: user.position || "",
       });
     }
   }, [user, accountForm]);
@@ -97,11 +105,15 @@ export default function Settings() {
   // Update chapter info mutation
   const updateChapterMutation = useMutation({
     mutationFn: async (data: InsertChapterInfo) => {
-      const response = await apiRequest("/api/chapter-info", {
+      const response = await fetch("/api/chapter-info", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(data),
       });
-      return response;
+      if (!response.ok) throw new Error('Failed to update chapter info');
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/chapter-info"] });
@@ -120,13 +132,21 @@ export default function Settings() {
     },
   });
 
-  // Update account info mutation (placeholder - would need backend implementation)
+  // Update account info mutation
   const updateAccountMutation = useMutation({
     mutationFn: async (data: AccountInfoFormData) => {
-      // This would require a backend endpoint to update user info
-      return Promise.resolve(data);
+      const response = await fetch("/api/users/current", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Failed to update account info');
+      return response.json();
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/users/me"] });
       setEditingAccount(false);
       toast({
         title: "Success",
@@ -142,6 +162,7 @@ export default function Settings() {
     },
   });
 
+  // Form submission handlers
   const onSubmitChapter = (data: InsertChapterInfo) => {
     updateChapterMutation.mutate(data);
   };
@@ -150,22 +171,13 @@ export default function Settings() {
     updateAccountMutation.mutate(data);
   };
 
+  // Export data functionality
   const exportData = () => {
     const exportData = {
       members,
       payments,
-      settings: {
-        chapterName,
-        monthlyDues,
-        chapterAddress,
-        chapterEmail,
-        emailNotifications,
-        overdueReminders,
-        paymentConfirmations,
-        autoBackup,
-        dataRetention
-      },
-      exportedAt: new Date().toISOString()
+      chapterInfo,
+      exportDate: new Date().toISOString()
     };
 
     const dataStr = JSON.stringify(exportData, null, 2);
@@ -218,11 +230,7 @@ export default function Settings() {
     const totalMembers = members.length;
     const totalPayments = payments.length;
     const totalAmount = payments.reduce((sum, payment) => sum + parseFloat(payment.amount), 0);
-    const lastBackup = new Date().toLocaleDateString('en-US', {
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric'
-    });
+    const lastBackup = localStorage.getItem('lastBackup') || 'Never';
 
     return {
       totalMembers,
@@ -499,7 +507,7 @@ export default function Settings() {
         </Card>
 
         {/* Data Management */}
-        <Card>
+        <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-lg font-semibold flex items-center">
               <Download className="h-5 w-5 mr-2" />
@@ -507,7 +515,7 @@ export default function Settings() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
                 <Label className="text-sm font-medium text-gray-500">Total Members</Label>
                 <p className="text-2xl font-bold text-gray-900">{stats.totalMembers}</p>
@@ -549,87 +557,6 @@ export default function Settings() {
             </p>
           </CardContent>
         </Card>
-      </div>
-    </div>
-  );
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Status</span>
-                <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Active</Badge>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Total Members</span>
-                <span className="font-medium">{stats.totalMembers}</span>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Total Payments</span>
-                <span className="font-medium">{stats.totalPayments}</span>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Total Amount</span>
-                <span className="font-medium">₱{stats.totalAmount.toLocaleString()}</span>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Last Backup</span>
-                <span className="font-medium text-sm">{stats.lastBackup}</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Account Info */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Account Information</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label className="text-sm text-gray-600">Officer Name</Label>
-                <p className="font-medium">{user?.name}</p>
-              </div>
-              
-              <div>
-                <Label className="text-sm text-gray-600">Position</Label>
-                <p className="font-medium">{user?.position}</p>
-              </div>
-              
-              <div>
-                <Label className="text-sm text-gray-600">Username</Label>
-                <p className="font-medium">{user?.username}</p>
-              </div>
-
-              <Separator />
-              
-              <Button 
-                variant="outline" 
-                onClick={logout}
-                className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
-              >
-                Sign Out
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Quick Actions */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Button variant="outline" size="sm" className="w-full justify-start">
-                View System Logs
-              </Button>
-              <Button variant="outline" size="sm" className="w-full justify-start">
-                Generate Report
-              </Button>
-              <Button variant="outline" size="sm" className="w-full justify-start">
-                Contact Support
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
       </div>
     </div>
   );
