@@ -17,8 +17,10 @@ interface MemberModalProps {
 
 export default function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
   const [name, setName] = useState("");
+  const [aliasName, setAliasName] = useState("");
   const [email, setEmail] = useState("");
   const [batchNumber, setBatchNumber] = useState("");
+  const [batchName, setBatchName] = useState("");
   const [status, setStatus] = useState("active");
   
   const { toast } = useToast();
@@ -28,13 +30,17 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
   useEffect(() => {
     if (member) {
       setName(member.name);
+      setAliasName(member.aliasName || "");
       setEmail(member.email);
       setBatchNumber(member.batchNumber);
+      setBatchName(member.batchName || "");
       setStatus(member.status);
     } else {
       setName("");
+      setAliasName("");
       setEmail("");
       setBatchNumber("");
+      setBatchName("");
       setStatus("active");
     }
   }, [member]);
@@ -42,8 +48,10 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
   const createMemberMutation = useMutation({
     mutationFn: async (memberData: {
       name: string;
+      aliasName?: string;
       email: string;
       batchNumber: string;
+      batchName?: string;
       status: string;
     }) => {
       const response = await apiRequest('POST', '/api/members', memberData);
@@ -70,8 +78,10 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
   const updateMemberMutation = useMutation({
     mutationFn: async (memberData: {
       name: string;
+      aliasName?: string;
       email: string;
       batchNumber: string;
+      batchName?: string;
       status: string;
     }) => {
       const response = await apiRequest('PUT', `/api/members/${member!.id}`, memberData);
@@ -108,8 +118,10 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
 
     const memberData = {
       name: name.trim(),
+      aliasName: aliasName.trim() || undefined,
       email: email.trim(),
       batchNumber: batchNumber.trim(),
+      batchName: batchName.trim() || undefined,
       status,
     };
 

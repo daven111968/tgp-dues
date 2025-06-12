@@ -13,8 +13,10 @@ export const users = pgTable("users", {
 export const members = pgTable("members", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
+  aliasName: text("alias_name"),
   email: text("email").notNull().unique(),
   batchNumber: text("batch_number").notNull().unique(),
+  batchName: text("batch_name"),
   status: text("status").notNull().default("active"), // active, inactive
   joinedAt: timestamp("joined_at").notNull().defaultNow(),
 });
