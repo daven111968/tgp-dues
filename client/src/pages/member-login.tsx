@@ -99,6 +99,14 @@ export default function MemberLogin() {
             </form>
 
             <div className="mt-6 text-center">
+              <p className="text-sm text-gray-600 mb-2">
+                Don't have an account?{" "}
+                <Link href="/member-register">
+                  <a className="font-medium text-primary hover:text-blue-500">
+                    Register Here
+                  </a>
+                </Link>
+              </p>
               <p className="text-sm text-gray-600">
                 Are you an administrator?{" "}
                 <Link href="/login">

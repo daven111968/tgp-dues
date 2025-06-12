@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertCircle, Users } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { Link } from "wouter";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -76,8 +77,18 @@ export default function Login() {
             </Button>
           </form>
           
-          <div className="mt-4 text-center text-sm text-gray-600">
-            Contact Chapter President for access credentials
+          <div className="mt-4 text-center">
+            <p className="text-sm text-gray-600 mb-2">
+              Are you a member?{" "}
+              <Link href="/member-login">
+                <a className="font-medium text-primary hover:text-blue-500">
+                  Member Login
+                </a>
+              </Link>
+            </p>
+            <p className="text-xs text-gray-500">
+              Contact Chapter President for access credentials
+            </p>
           </div>
         </CardContent>
       </Card>

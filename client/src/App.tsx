@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "@/lib/auth";
 import { OfflineIndicator } from "@/components/ui/offline-indicator";
 import Login from "@/pages/login";
 import MemberLogin from "@/pages/member-login";
+import MemberRegister from "@/pages/member-register";
 import Dashboard from "@/pages/dashboard";
 import Members from "@/pages/members";
 import Payments from "@/pages/payments";
@@ -25,6 +26,7 @@ function AuthenticatedApp() {
     return (
       <Switch>
         <Route path="/member-login" component={() => <MemberLogin />} />
+        <Route path="/member-register" component={() => <MemberRegister />} />
         <Route component={() => <Login />} />
       </Switch>
     );

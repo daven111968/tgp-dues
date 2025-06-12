@@ -110,6 +110,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Member registration endpoint
+  app.post("/api/members/register", async (req, res) => {
+    try {
+      // Convert date strings to Date objects
+      const requestBody = {
+        ...req.body,
+        initiationDate: req.body.initiationDate ? new Date(req.body.initiationDate) : undefined,
+        welcomingDate: req.body.welcomingDate ? new Date(req.body.welcomingDate) : undefined
+      };
+      
+      const memberData = insertMemberSchema.parse(requestBody);
+      
+      // Check if username already exists
+      if (memberData.username) {
+        const existingMember = await storage.getMemberByUsername(memberData.username);
+        if (existingMember) {
+          return res.status(400).json({ error: "Username already exists" });
+        }
+      }
+      
+      // Check if batch number already exists (only for pure blooded members)
+      if (memberData.batchNumber) {
+        const existingMember = await storage.getMemberByBatchNumber(memberData.batchNumber);
+        if (existingMember) {
+          return res.status(400).json({ error: "A member with this batch number already exists" });
+        }
+      }
+      
+      const newMember = await storage.createMember(memberData);
+      res.status(201).json({ message: "Registration successful", member: { id: newMember.id, name: newMember.name } });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid registration data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Registration failed" });
+    }
+  });
+
   app.post("/api/members", async (req, res) => {
     try {
       // Convert date strings to Date objects
