@@ -115,7 +115,7 @@ export default function Reports() {
       memberData[member.id] = {
         memberId: member.id,
         name: member.name,
-        batchNumber: member.batchNumber,
+        batchNumber: member.batchNumber || 'N/A',
         totalAmount: 0,
         paymentCount: 0,
         lastPayment: null

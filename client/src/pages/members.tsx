@@ -92,7 +92,7 @@ export default function Members() {
   const filteredMembers = members.filter(member => {
     const matchesSearch = member.name.toLowerCase().includes(search.toLowerCase()) ||
                          member.address.toLowerCase().includes(search.toLowerCase()) ||
-                         member.batchNumber.toLowerCase().includes(search.toLowerCase());
+                         (member.batchNumber && member.batchNumber.toLowerCase().includes(search.toLowerCase()));
     
     if (!matchesSearch) return false;
     
@@ -267,7 +267,7 @@ export default function Members() {
                           </div>
                         </TableCell>
                         <TableCell className="text-sm text-gray-900">
-                          {member.batchNumber}
+                          {member.batchNumber || "—"}
                           {member.batchName && (
                             <div className="text-xs text-gray-500">{member.batchName}</div>
                           )}

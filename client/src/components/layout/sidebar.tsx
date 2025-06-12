@@ -10,6 +10,7 @@ const navigation = [
   { name: "Payment Tracking", href: "/payments", icon: CreditCard },
   { name: "Activity Contributions", href: "/activities", icon: Calendar },
   { name: "Financial Reports", href: "/reports", icon: BarChart3 },
+  { name: "Member Portal", href: "/member-portal", icon: UserCheck },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
 

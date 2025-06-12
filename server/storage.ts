@@ -91,7 +91,6 @@ export class DatabaseStorage implements IStorage {
         {
           name: "Paolo Rodriguez",
           address: "789 EDSA, Makati City",
-          batchNumber: "Batch-2022",
           initiationDate: new Date('2022-02-10'),
           memberType: "welcome",
           welcomingDate: new Date('2022-03-01'),
