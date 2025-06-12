@@ -18,6 +18,8 @@ export const members = pgTable("members", {
   batchNumber: text("batch_number").notNull().unique(),
   batchName: text("batch_name"),
   initiationDate: timestamp("initiation_date").notNull(),
+  memberType: text("member_type").notNull().default("pure_blooded"), // pure_blooded, welcome
+  welcomingDate: timestamp("welcoming_date"),
   status: text("status").notNull().default("active"), // active, inactive
   joinedAt: timestamp("joined_at").notNull().defaultNow(),
 });

@@ -22,6 +22,8 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
   const [batchNumber, setBatchNumber] = useState("");
   const [batchName, setBatchName] = useState("");
   const [initiationDate, setInitiationDate] = useState("");
+  const [memberType, setMemberType] = useState("pure_blooded");
+  const [welcomingDate, setWelcomingDate] = useState("");
   const [status, setStatus] = useState("active");
   
   const { toast } = useToast();
@@ -36,6 +38,8 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
       setBatchNumber(member.batchNumber);
       setBatchName(member.batchName || "");
       setInitiationDate(member.initiationDate ? new Date(member.initiationDate).toISOString().split('T')[0] : "");
+      setMemberType(member.memberType || "pure_blooded");
+      setWelcomingDate(member.welcomingDate ? new Date(member.welcomingDate).toISOString().split('T')[0] : "");
       setStatus(member.status);
     } else {
       setName("");
@@ -44,6 +48,8 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
       setBatchNumber("");
       setBatchName("");
       setInitiationDate("");
+      setMemberType("pure_blooded");
+      setWelcomingDate("");
       setStatus("active");
     }
   }, [member]);
@@ -56,6 +62,8 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
       batchNumber: string;
       batchName?: string;
       initiationDate: string;
+      memberType: string;
+      welcomingDate?: string;
       status: string;
     }) => {
       const response = await apiRequest('POST', '/api/members', memberData);
@@ -87,6 +95,8 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
       batchNumber: string;
       batchName?: string;
       initiationDate: string;
+      memberType: string;
+      welcomingDate?: string;
       status: string;
     }) => {
       const response = await apiRequest('PUT', `/api/members/${member!.id}`, memberData);
@@ -121,6 +131,16 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
       return;
     }
 
+    // Validate welcoming date for welcome members
+    if (memberType === "welcome" && !welcomingDate) {
+      toast({
+        title: "Error",
+        description: "Welcoming date is required for welcome members",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const memberData = {
       name: name.trim(),
       alexisName: alexisName.trim() || undefined,
@@ -128,6 +148,8 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
       batchNumber: batchNumber.trim(),
       batchName: batchName.trim() || undefined,
       initiationDate: initiationDate,
+      memberType: memberType,
+      welcomingDate: memberType === "welcome" ? welcomingDate : undefined,
       status,
     };
 
@@ -145,6 +167,8 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
     setBatchNumber("");
     setBatchName("");
     setInitiationDate("");
+    setMemberType("pure_blooded");
+    setWelcomingDate("");
     setStatus("active");
     onClose();
   };
