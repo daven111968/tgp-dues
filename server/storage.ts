@@ -77,6 +77,7 @@ export class DatabaseStorage implements IStorage {
           address: "123 Main St, Quezon City",
           batchNumber: "Batch-2021",
           initiationDate: new Date('2021-03-15'),
+          memberType: "pure_blooded",
           status: "active"
         },
         {
@@ -84,6 +85,7 @@ export class DatabaseStorage implements IStorage {
           address: "456 Rizal Ave, Manila",
           batchNumber: "Batch-2021", 
           initiationDate: new Date('2021-04-20'),
+          memberType: "pure_blooded",
           status: "active"
         },
         {
@@ -91,6 +93,8 @@ export class DatabaseStorage implements IStorage {
           address: "789 EDSA, Makati City",
           batchNumber: "Batch-2022",
           initiationDate: new Date('2022-02-10'),
+          memberType: "welcome",
+          welcomingDate: new Date('2022-03-01'),
           status: "active"
         }
       ];

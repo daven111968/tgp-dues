@@ -85,10 +85,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/members", async (req, res) => {
     try {
-      // Convert initiation date string to Date object
+      // Convert date strings to Date objects
       const requestBody = {
         ...req.body,
-        initiationDate: req.body.initiationDate ? new Date(req.body.initiationDate) : undefined
+        initiationDate: req.body.initiationDate ? new Date(req.body.initiationDate) : undefined,
+        welcomingDate: req.body.welcomingDate ? new Date(req.body.welcomingDate) : undefined
       };
       
       const memberData = insertMemberSchema.parse(requestBody);
@@ -113,10 +114,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       
-      // Convert initiation date string to Date object if provided
+      // Convert date strings to Date objects if provided
       const requestBody = {
         ...req.body,
-        initiationDate: req.body.initiationDate ? new Date(req.body.initiationDate) : undefined
+        initiationDate: req.body.initiationDate ? new Date(req.body.initiationDate) : undefined,
+        welcomingDate: req.body.welcomingDate ? new Date(req.body.welcomingDate) : undefined
       };
       
       const memberData = insertMemberSchema.partial().parse(requestBody);

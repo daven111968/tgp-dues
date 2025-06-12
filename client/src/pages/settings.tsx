@@ -235,13 +235,15 @@ export default function Settings() {
           member.batchNumber || 'N/A',
           member.address,
           new Date(member.initiationDate).toLocaleDateString(),
+          member.memberType === "pure_blooded" ? "Pure Blooded" : "Welcome",
+          member.welcomingDate ? new Date(member.welcomingDate).toLocaleDateString() : 'N/A',
           member.status,
           new Date(member.joinedAt).toLocaleDateString()
         ]);
         
         autoTable(doc, {
           startY: yPos + 10,
-          head: [['Name', 'Batch Number', 'Address', 'Initiation Date', 'Status', 'Joined Date']],
+          head: [['Name', 'Batch Number', 'Address', 'Initiation Date', 'Member Type', 'Welcoming Date', 'Status', 'Joined Date']],
           body: memberTableData,
           theme: 'striped',
           styles: { fontSize: 8 },

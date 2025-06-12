@@ -248,6 +248,32 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
           </div>
           
           <div>
+            <Label htmlFor="memberType">Member Type *</Label>
+            <Select value={memberType} onValueChange={setMemberType}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pure_blooded">Pure Blooded</SelectItem>
+                <SelectItem value="welcome">Welcome</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {memberType === "welcome" && (
+            <div>
+              <Label htmlFor="welcomingDate">Welcoming Date *</Label>
+              <Input
+                id="welcomingDate"
+                type="date"
+                value={welcomingDate}
+                onChange={(e) => setWelcomingDate(e.target.value)}
+                required
+              />
+            </div>
+          )}
+          
+          <div>
             <Label htmlFor="status">Status</Label>
             <Select value={status} onValueChange={setStatus}>
               <SelectTrigger>

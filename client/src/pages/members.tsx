@@ -389,6 +389,18 @@ export default function Members() {
                     </div>
                     <div className="space-y-4">
                       <div>
+                        <p className="text-sm font-medium text-gray-500">Member Type</p>
+                        <p className="text-sm text-gray-900">
+                          {viewingMember.memberType === "pure_blooded" ? "Pure Blooded" : "Welcome"}
+                        </p>
+                      </div>
+                      {viewingMember.memberType === "welcome" && viewingMember.welcomingDate && (
+                        <div>
+                          <p className="text-sm font-medium text-gray-500">Welcoming Date</p>
+                          <p className="text-sm text-gray-900">{formatDate(viewingMember.welcomingDate)}</p>
+                        </div>
+                      )}
+                      <div>
                         <p className="text-sm font-medium text-gray-500">Status</p>
                         <div className="mt-1">
                           {getStatusBadge(getMemberPaymentStatus(viewingMember.id).status)}
