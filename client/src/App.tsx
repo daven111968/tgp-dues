@@ -7,6 +7,9 @@ import { AuthProvider, useAuth } from "@/lib/auth";
 import Login from "@/pages/login";
 import Dashboard from "@/pages/dashboard";
 import Members from "@/pages/members";
+import Payments from "@/pages/payments";
+import Reports from "@/pages/reports";
+import Settings from "@/pages/settings";
 import Sidebar from "@/components/layout/sidebar";
 import MobileHeader from "@/components/layout/mobile-header";
 import NotFound from "@/pages/not-found";
@@ -28,9 +31,9 @@ function AuthenticatedApp() {
           <Route path="/" component={() => <Dashboard />} />
           <Route path="/dashboard" component={() => <Dashboard />} />
           <Route path="/members" component={() => <Members />} />
-          <Route path="/payments" component={() => <div className="p-6"><h2 className="text-2xl font-bold">Payment Tracking - Coming Soon</h2></div>} />
-          <Route path="/reports" component={() => <div className="p-6"><h2 className="text-2xl font-bold">Financial Reports - Coming Soon</h2></div>} />
-          <Route path="/settings" component={() => <div className="p-6"><h2 className="text-2xl font-bold">Settings - Coming Soon</h2></div>} />
+          <Route path="/payments" component={() => <Payments />} />
+          <Route path="/reports" component={() => <Reports />} />
+          <Route path="/settings" component={() => <Settings />} />
           <Route component={NotFound} />
         </Switch>
       </div>

@@ -1,0 +1,252 @@
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Plus, Download, Calendar, DollarSign } from "lucide-react";
+import PaymentModal from "@/components/modals/payment-modal";
+import type { Payment, Member } from "@shared/schema";
+
+export default function Payments() {
+  const [search, setSearch] = useState("");
+  const [monthFilter, setMonthFilter] = useState("");
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+
+  const { data: payments = [], isLoading: paymentsLoading } = useQuery<Payment[]>({
+    queryKey: ["/api/payments"],
+  });
+
+  const { data: members = [] } = useQuery<Member[]>({
+    queryKey: ["/api/members"],
+  });
+
+  // Get member name by ID
+  const getMemberName = (memberId: number) => {
+    const member = members.find(m => m.id === memberId);
+    return member?.name || 'Unknown Member';
+  };
+
+  // Get unique months from payments
+  const getUniqueMonths = () => {
+    const months = payments.map(payment => {
+      const date = new Date(payment.paymentDate);
+      return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    });
+    return [...new Set(months)].sort();
+  };
+
+  // Filter payments based on search and month
+  const filteredPayments = payments.filter(payment => {
+    const memberName = getMemberName(payment.memberId);
+    const matchesSearch = memberName.toLowerCase().includes(search.toLowerCase()) ||
+                         payment.amount.toString().includes(search.toLowerCase()) ||
+                         (payment.notes && payment.notes.toLowerCase().includes(search.toLowerCase()));
+    
+    if (!matchesSearch) return false;
+    
+    if (!monthFilter) return true;
+    
+    const paymentMonth = new Date(payment.paymentDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    return paymentMonth === monthFilter;
+  });
+
+  // Calculate total amount for filtered payments
+  const totalAmount = filteredPayments.reduce((sum, payment) => sum + parseFloat(payment.amount), 0);
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
+
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return "Just now";
+    if (diffInHours < 24) return `${diffInHours} hours ago`;
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays === 1) return "1 day ago";
+    return `${diffInDays} days ago`;
+  };
+
+  if (paymentsLoading) {
+    return (
+      <div className="flex-1 overflow-auto p-6">
+        <p>Loading payments...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex-1 overflow-auto p-6">
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-4 sm:mb-0">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Payment Tracking</h2>
+          <p className="text-gray-600">Track and manage member payment history</p>
+        </div>
+        <Button 
+          onClick={() => setIsPaymentModalOpen(true)}
+          className="flex items-center space-x-2"
+        >
+          <Plus className="h-4 w-4" />
+          <span>Record Payment</span>
+        </Button>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Payments</p>
+                <p className="text-3xl font-bold text-gray-900">{filteredPayments.length}</p>
+              </div>
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <Calendar className="text-primary text-xl" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Amount</p>
+                <p className="text-3xl font-bold text-green-600">₱{totalAmount.toLocaleString()}</p>
+              </div>
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <DollarSign className="text-green-600 text-xl" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Average Payment</p>
+                <p className="text-3xl font-bold text-gray-900">
+                  ₱{filteredPayments.length > 0 ? Math.round(totalAmount / filteredPayments.length) : 0}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                <DollarSign className="text-gray-600 text-xl" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Search and Filter */}
+      <Card className="mb-6">
+        <CardContent className="p-6">
+          <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+            <div className="flex-1">
+              <Input
+                type="text"
+                placeholder="Search payments..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+            <Select value={monthFilter} onValueChange={setMonthFilter}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="All Months" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All Months</SelectItem>
+                {getUniqueMonths().map(month => (
+                  <SelectItem key={month} value={month}>{month}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button variant="outline" className="flex items-center space-x-2">
+              <Download className="h-4 w-4" />
+              <span>Export</span>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Payments Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Payment History</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Member</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Payment Date</TableHead>
+                  <TableHead>Time Recorded</TableHead>
+                  <TableHead>Notes</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredPayments.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                      No payments found
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredPayments
+                    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                    .map((payment) => (
+                      <TableRow key={payment.id} className="hover:bg-gray-50">
+                        <TableCell>
+                          <div className="font-medium text-gray-900">{getMemberName(payment.memberId)}</div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+                            ₱{payment.amount}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm text-gray-900">
+                          {formatDate(payment.paymentDate)}
+                        </TableCell>
+                        <TableCell className="text-sm text-gray-600">
+                          {formatTime(payment.createdAt)}
+                        </TableCell>
+                        <TableCell className="text-sm text-gray-600">
+                          {payment.notes || '-'}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+          
+          {/* Pagination Info */}
+          <div className="bg-white px-6 py-3 border-t border-gray-200 flex items-center justify-between">
+            <div className="text-sm text-gray-700">
+              Showing {filteredPayments.length} of {payments.length} payments
+            </div>
+            <div className="text-sm font-medium text-gray-900">
+              Total: ₱{totalAmount.toLocaleString()}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <PaymentModal 
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+      />
+    </div>
+  );
+}

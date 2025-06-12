@@ -88,7 +88,7 @@ export default function Members() {
     
     if (!matchesSearch) return false;
     
-    if (!statusFilter) return true;
+    if (!statusFilter || statusFilter === "all") return true;
     
     const paymentStatus = getMemberPaymentStatus(member.id);
     return paymentStatus.status === statusFilter;
@@ -167,7 +167,7 @@ export default function Members() {
                 <SelectValue placeholder="All Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Status</SelectItem>
+                <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="paid">Paid</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="overdue">Overdue</SelectItem>
