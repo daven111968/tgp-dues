@@ -28,8 +28,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return response.json();
     },
     onSuccess: (data) => {
+      console.log('Login successful, setting user:', data.user);
       setUser(data.user);
       localStorage.setItem('user', JSON.stringify(data.user));
+    },
+    onError: (error) => {
+      console.error('Login error:', error);
+      setUser(null);
+      localStorage.removeItem('user');
     },
   });
 

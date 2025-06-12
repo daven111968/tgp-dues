@@ -11,7 +11,10 @@ export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const { login, isLoading } = useAuth();
+  const { login, isLoading, user } = useAuth();
+
+  // Debug: Log user state changes
+  console.log('Login page - current user:', user);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
