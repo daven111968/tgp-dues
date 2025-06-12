@@ -200,20 +200,17 @@ export default function Activities() {
         yPos += 10;
         
         const activitiesData = activities.map(activity => {
-          const progress = getProgressPercentage(activity.currentAmount, activity.targetAmount);
           return [
             activity.name,
             activity.status.charAt(0).toUpperCase() + activity.status.slice(1),
-            `₱${parseFloat(activity.targetAmount).toLocaleString()}`,
             `₱${parseFloat(activity.currentAmount).toLocaleString()}`,
-            `${progress.toFixed(1)}%`,
             formatDate(activity.createdAt)
           ];
         });
         
         autoTable(doc, {
           startY: yPos,
-          head: [['Activity Name', 'Status', 'Target', 'Raised', 'Progress', 'Created']],
+          head: [['Activity Name', 'Status', 'Total Raised', 'Created']],
           body: activitiesData,
           theme: 'striped',
           styles: { fontSize: 8 },
@@ -539,20 +536,6 @@ export default function Activities() {
                     <FormLabel>Description</FormLabel>
                     <FormControl>
                       <Textarea placeholder="Enter activity description" {...field} value={field.value || ""} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={activityForm.control}
-                name="targetAmount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Target Amount (₱)</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="0.00" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
