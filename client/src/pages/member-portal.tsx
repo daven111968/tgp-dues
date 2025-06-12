@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calendar, CreditCard, User, MapPin, Clock, FileText, LogOut, Activity } from "lucide-react";
+import { Calendar, CreditCard, User, MapPin, Clock, FileText, LogOut, Activity, Users } from "lucide-react";
 import { Member, Payment, Contribution, Activity as ActivityType } from "@shared/schema";
 import { useAuth } from "@/lib/auth";
 
@@ -84,6 +84,42 @@ export default function MemberPortal() {
   };
 
   const monthlyStats = getMonthlyStats();
+
+  // Get detailed member payment status for current month
+  const getCurrentMonthMemberDetails = () => {
+    const currentDate = new Date();
+    const month = currentDate.getMonth();
+    const year = currentDate.getFullYear();
+    
+    const monthlyPayments = payments.filter(payment => {
+      const paymentDate = new Date(payment.paymentDate);
+      return paymentDate.getMonth() === month && paymentDate.getFullYear() === year;
+    });
+
+    // Group payments by member
+    const memberPaymentTotals = new Map();
+    monthlyPayments.forEach(payment => {
+      const current = memberPaymentTotals.get(payment.memberId) || 0;
+      memberPaymentTotals.set(payment.memberId, current + parseFloat(payment.amount));
+    });
+
+    return members.map(member => {
+      const totalPaid = memberPaymentTotals.get(member.id) || 0;
+      let status = 'pending';
+      if (totalPaid >= 100) status = 'paid';
+      else if (totalPaid > 0) status = 'partial';
+
+      return {
+        id: member.id,
+        name: member.name,
+        totalPaid,
+        status,
+        remaining: Math.max(0, 100 - totalPaid)
+      };
+    });
+  };
+
+  const currentMonthMemberDetails = getCurrentMonthMemberDetails();
 
   // Calculate payment status
   const getPaymentStatus = (member: Member) => {
@@ -459,6 +495,83 @@ export default function MemberPortal() {
                     <FileText className="h-8 w-8 text-purple-500" />
                   </div>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Current Month Member Payment Status */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Users className="h-5 w-5" />
+                <span>Chapter Payment Status - {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <p className="text-sm font-medium text-green-600">Paid in Full</p>
+                  <p className="text-2xl font-bold text-green-900">
+                    {currentMonthMemberDetails.filter(member => member.status === 'paid').length}
+                  </p>
+                </div>
+                <div className="bg-yellow-50 p-4 rounded-lg">
+                  <p className="text-sm font-medium text-yellow-600">Partial Payment</p>
+                  <p className="text-2xl font-bold text-yellow-900">
+                    {currentMonthMemberDetails.filter(member => member.status === 'partial').length}
+                  </p>
+                </div>
+                <div className="bg-red-50 p-4 rounded-lg">
+                  <p className="text-sm font-medium text-red-600">Pending</p>
+                  <p className="text-2xl font-bold text-red-900">
+                    {currentMonthMemberDetails.filter(member => member.status === 'pending').length}
+                  </p>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Member Name</TableHead>
+                      <TableHead className="text-center">Status</TableHead>
+                      <TableHead className="text-right">Amount Paid</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {currentMonthMemberDetails
+                      .sort((a, b) => {
+                        const statusOrder = { paid: 0, partial: 1, pending: 2 } as const;
+                        const statusA = statusOrder[a.status as keyof typeof statusOrder] ?? 3;
+                        const statusB = statusOrder[b.status as keyof typeof statusOrder] ?? 3;
+                        return statusA - statusB || a.name.localeCompare(b.name);
+                      })
+                      .map((member) => (
+                        <TableRow key={member.id} className={member.id === currentMember?.id ? 'bg-blue-50' : ''}>
+                          <TableCell className="font-medium">
+                            {member.name}
+                            {member.id === currentMember?.id && (
+                              <span className="ml-2 text-xs text-blue-600">(You)</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            {member.status === 'paid' && (
+                              <Badge className="bg-green-100 text-green-800">Paid</Badge>
+                            )}
+                            {member.status === 'partial' && (
+                              <Badge className="bg-yellow-100 text-yellow-800">Partial</Badge>
+                            )}
+                            {member.status === 'pending' && (
+                              <Badge className="bg-red-100 text-red-800">Pending</Badge>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right font-mono">
+                            ₱{member.totalPaid.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
               </div>
             </CardContent>
           </Card>

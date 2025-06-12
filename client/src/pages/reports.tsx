@@ -92,6 +92,40 @@ export default function Reports() {
 
   const monthlyStats = getMonthlyStats();
 
+  // Get detailed member payment status for a specific month
+  const getMemberPaymentDetails = (month: number, year: number) => {
+    const monthlyPayments = payments.filter(payment => {
+      const paymentDate = new Date(payment.paymentDate);
+      return paymentDate.getMonth() === month && paymentDate.getFullYear() === year;
+    });
+
+    // Group payments by member
+    const memberPaymentTotals = new Map();
+    monthlyPayments.forEach(payment => {
+      const current = memberPaymentTotals.get(payment.memberId) || 0;
+      memberPaymentTotals.set(payment.memberId, current + parseFloat(payment.amount));
+    });
+
+    return members.map(member => {
+      const totalPaid = memberPaymentTotals.get(member.id) || 0;
+      let status = 'pending';
+      if (totalPaid >= 100) status = 'paid';
+      else if (totalPaid > 0) status = 'partial';
+
+      return {
+        id: member.id,
+        name: member.name,
+        totalPaid,
+        status,
+        remaining: Math.max(0, 100 - totalPaid)
+      };
+    });
+  };
+
+  // Get current month details
+  const currentDate = new Date();
+  const currentMonthDetails = getMemberPaymentDetails(currentDate.getMonth(), currentDate.getFullYear());
+
   // Calculate monthly summary
   const getMonthlyReport = () => {
     const filteredPayments = getFilteredPayments();
@@ -560,6 +594,87 @@ export default function Reports() {
                     </TableCell>
                   </TableRow>
                 ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Current Month Member Payment Details */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Users className="h-5 w-5" />
+            <span>Current Month Payment Details ({currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })})</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="bg-green-50 p-4 rounded-lg">
+              <p className="text-sm font-medium text-green-600">Paid in Full</p>
+              <p className="text-2xl font-bold text-green-900">
+                {currentMonthDetails.filter(member => member.status === 'paid').length}
+              </p>
+            </div>
+            <div className="bg-yellow-50 p-4 rounded-lg">
+              <p className="text-sm font-medium text-yellow-600">Partial Payment</p>
+              <p className="text-2xl font-bold text-yellow-900">
+                {currentMonthDetails.filter(member => member.status === 'partial').length}
+              </p>
+            </div>
+            <div className="bg-red-50 p-4 rounded-lg">
+              <p className="text-sm font-medium text-red-600">Pending</p>
+              <p className="text-2xl font-bold text-red-900">
+                {currentMonthDetails.filter(member => member.status === 'pending').length}
+              </p>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Member Name</TableHead>
+                  <TableHead className="text-center">Status</TableHead>
+                  <TableHead className="text-right">Amount Paid</TableHead>
+                  <TableHead className="text-right">Remaining</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {currentMonthDetails
+                  .sort((a, b) => {
+                    // Sort by status: paid first, then partial, then pending
+                    const statusOrder = { paid: 0, partial: 1, pending: 2 } as const;
+                    const statusA = statusOrder[a.status as keyof typeof statusOrder] ?? 3;
+                    const statusB = statusOrder[b.status as keyof typeof statusOrder] ?? 3;
+                    return statusA - statusB || a.name.localeCompare(b.name);
+                  })
+                  .map((member) => (
+                    <TableRow key={member.id}>
+                      <TableCell className="font-medium">{member.name}</TableCell>
+                      <TableCell className="text-center">
+                        {member.status === 'paid' && (
+                          <Badge className="bg-green-100 text-green-800">Paid</Badge>
+                        )}
+                        {member.status === 'partial' && (
+                          <Badge className="bg-yellow-100 text-yellow-800">Partial</Badge>
+                        )}
+                        {member.status === 'pending' && (
+                          <Badge className="bg-red-100 text-red-800">Pending</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right font-mono">
+                        ₱{member.totalPaid.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      </TableCell>
+                      <TableCell className="text-right font-mono">
+                        {member.remaining > 0 ? (
+                          <span className="text-red-600">₱{member.remaining.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                        ) : (
+                          <span className="text-green-600">—</span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
           </div>
