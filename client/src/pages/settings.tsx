@@ -175,6 +175,8 @@ export default function Settings() {
 
   // Export data functionality as PDF
   const exportData = () => {
+    console.log('Settings exportData function called');
+    alert('Settings PDF export function triggered');
     try {
       const doc = new jsPDF();
       const currentDate = new Date().toLocaleDateString();
@@ -646,9 +648,9 @@ export default function Settings() {
             </div>
             <Separator />
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
-              <Button onClick={exportData} className="flex items-center justify-center space-x-2 touch-friendly">
+              <Button onClick={exportData} className="flex items-center justify-center space-x-2 touch-friendly bg-blue-600 hover:bg-blue-700">
                 <Download className="h-4 w-4" />
-                <span>Export PDF Report</span>
+                <span>Export PDF Report (Settings)</span>
               </Button>
               <div className="relative">
                 <Button variant="outline" className="flex items-center justify-center space-x-2 touch-friendly">
