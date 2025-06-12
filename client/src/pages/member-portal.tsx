@@ -558,7 +558,7 @@ export default function MemberPortal() {
                   <TableBody>
                     {selectedMonthMemberDetails
                       .sort((a, b) => {
-                        const statusOrder = { paid: 0, pending: 1 } as const;
+                        const statusOrder = { paid: 0, unpaid: 1 } as const;
                         const statusA = statusOrder[a.status as keyof typeof statusOrder] ?? 2;
                         const statusB = statusOrder[b.status as keyof typeof statusOrder] ?? 2;
                         return statusA - statusB || a.name.localeCompare(b.name);
@@ -575,8 +575,8 @@ export default function MemberPortal() {
                             {member.status === 'paid' && (
                               <Badge className="bg-green-100 text-green-800">Paid</Badge>
                             )}
-                            {member.status === 'pending' && (
-                              <Badge className="bg-red-100 text-red-800">Pending</Badge>
+                            {member.status === 'unpaid' && (
+                              <Badge className="bg-red-100 text-red-800">Unpaid</Badge>
                             )}
                           </TableCell>
                           <TableCell className="text-right font-mono">
