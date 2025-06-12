@@ -1,19 +1,24 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Download, Calendar, DollarSign } from "lucide-react";
+import { Plus, Download, Calendar, DollarSign, Trash2 } from "lucide-react";
 import PaymentModal from "@/components/modals/payment-modal";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import type { Payment, Member } from "@shared/schema";
 
 export default function Payments() {
   const [search, setSearch] = useState("");
   const [monthFilter, setMonthFilter] = useState("");
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: payments = [], isLoading: paymentsLoading } = useQuery<Payment[]>({
     queryKey: ["/api/payments"],
@@ -56,6 +61,87 @@ export default function Payments() {
   // Calculate total amount for filtered payments
   const totalAmount = filteredPayments.reduce((sum, payment) => sum + parseFloat(payment.amount), 0);
 
+  // Clear all payments mutation
+  const clearPaymentsMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest('DELETE', '/api/payments/clear');
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/payments"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/recent-payments"] });
+      toast({
+        title: "Success",
+        description: "All payment records have been cleared",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to clear payment records",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Export monthly report function
+  const exportMonthlyReport = () => {
+    if (filteredPayments.length === 0) {
+      toast({
+        title: "No Data",
+        description: "No payments to export for the selected period",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Generate report data
+    const reportData = {
+      reportTitle: `Monthly Payment Report - ${monthFilter || "All Months"}`,
+      generatedDate: new Date().toISOString(),
+      totalPayments: filteredPayments.length,
+      totalAmount: totalAmount,
+      averagePayment: filteredPayments.length > 0 ? totalAmount / filteredPayments.length : 0,
+      payments: filteredPayments.map(payment => ({
+        id: payment.id,
+        memberName: getMemberName(payment.memberId),
+        amount: payment.amount,
+        paymentDate: formatDate(payment.paymentDate),
+        notes: payment.notes || "No notes",
+        recordedAt: formatTime(payment.createdAt)
+      }))
+    };
+
+    // Create and download CSV
+    const csvHeaders = "ID,Member Name,Amount,Payment Date,Notes,Recorded At\n";
+    const csvData = reportData.payments
+      .map(p => `${p.id},"${p.memberName}","₱${p.amount}","${p.paymentDate}","${p.notes}","${p.recordedAt}"`)
+      .join("\n");
+    
+    const csvContent = csvHeaders + csvData;
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `payment-report-${monthFilter || 'all'}-${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Success",
+      description: "Monthly payment report exported successfully",
+    });
+  };
+
+  const handleClearPayments = () => {
+    if (window.confirm("Are you sure you want to clear all payment records? This action cannot be undone.")) {
+      clearPaymentsMutation.mutate();
+    }
+  };
+
   const formatDate = (date: string | Date) => {
     return new Date(date).toLocaleDateString('en-US', {
       month: 'short',
@@ -91,13 +177,24 @@ export default function Payments() {
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Payment Tracking</h2>
           <p className="text-gray-600">Track and manage member payment history</p>
         </div>
-        <Button 
-          onClick={() => setIsPaymentModalOpen(true)}
-          className="flex items-center space-x-2"
-        >
-          <Plus className="h-4 w-4" />
-          <span>Record Payment</span>
-        </Button>
+        <div className="flex space-x-2">
+          <Button 
+            onClick={() => setIsPaymentModalOpen(true)}
+            className="flex items-center space-x-2"
+          >
+            <Plus className="h-4 w-4" />
+            <span>Record Payment</span>
+          </Button>
+          <Button 
+            onClick={handleClearPayments}
+            variant="destructive"
+            className="flex items-center space-x-2"
+            disabled={clearPaymentsMutation.isPending || payments.length === 0}
+          >
+            <Trash2 className="h-4 w-4" />
+            <span>Clear All</span>
+          </Button>
+        </div>
       </div>
 
       {/* Summary Cards */}
@@ -170,7 +267,12 @@ export default function Payments() {
                 ))}
               </SelectContent>
             </Select>
-            <Button variant="outline" className="flex items-center space-x-2">
+            <Button 
+              onClick={exportMonthlyReport}
+              variant="outline" 
+              className="flex items-center space-x-2"
+              disabled={filteredPayments.length === 0}
+            >
               <Download className="h-4 w-4" />
               <span>Export</span>
             </Button>

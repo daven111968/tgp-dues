@@ -20,6 +20,7 @@ export interface IStorage {
   getPayments(): Promise<Payment[]>;
   getPaymentsByMember(memberId: number): Promise<Payment[]>;
   createPayment(payment: InsertPayment): Promise<Payment>;
+  clearAllPayments(): Promise<boolean>;
   getPaymentStats(): Promise<{
     totalMembers: number;
     paidMembers: number;
@@ -180,6 +181,16 @@ export class DatabaseStorage implements IStorage {
       .values(insertPayment)
       .returning();
     return payment;
+  }
+
+  async clearAllPayments(): Promise<boolean> {
+    try {
+      await db.delete(payments);
+      return true;
+    } catch (error) {
+      console.error('Error clearing payments:', error);
+      return false;
+    }
   }
 
   async getPaymentStats(): Promise<{
