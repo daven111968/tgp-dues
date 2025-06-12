@@ -85,17 +85,6 @@ export default function MemberPortal() {
     return monthlyStats;
   };
 
-  const allMonthlyStats = getMonthlyStats();
-  
-  // Filter statistics based on selected month
-  const filteredPaymentStats = selectedPaymentStatMonth === "all" 
-    ? allMonthlyStats 
-    : allMonthlyStats.filter(stat => {
-        const [year, month] = selectedPaymentStatMonth.split('-').map(Number);
-        const statDate = new Date(stat.month + ' 1, 2024');
-        return statDate.getMonth() === month - 1 && statDate.getFullYear() === year;
-      });
-
   // State for selected month
   const [selectedMemberMonth, setSelectedMemberMonth] = useState(() => {
     const now = new Date();
@@ -135,6 +124,16 @@ export default function MemberPortal() {
 
   // State for payment statistics month selection
   const [selectedPaymentStatMonth, setSelectedPaymentStatMonth] = useState("all");
+
+  // Get all monthly statistics and filter based on selection
+  const allMonthlyStats = getMonthlyStats();
+  const filteredPaymentStats = selectedPaymentStatMonth === "all" 
+    ? allMonthlyStats 
+    : allMonthlyStats.filter(stat => {
+        const [year, month] = selectedPaymentStatMonth.split('-').map(Number);
+        const statDate = new Date(stat.month + ' 1, 2024');
+        return statDate.getMonth() === month - 1 && statDate.getFullYear() === year;
+      });
 
   // Calculate payment status
   const getPaymentStatus = (member: Member) => {
@@ -259,7 +258,7 @@ export default function MemberPortal() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {monthlyStats.map((stat) => (
+                {filteredPaymentStats.map((stat) => (
                   <TableRow key={stat.month}>
                     <TableCell className="font-medium">{stat.month}</TableCell>
                     <TableCell className="text-center">{stat.totalMembers}</TableCell>
