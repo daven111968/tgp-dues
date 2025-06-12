@@ -596,18 +596,36 @@ export default function Reports() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Months</SelectItem>
-                {getAvailableYears().flatMap(year => 
-                  Array.from({ length: 12 }, (_, i) => {
-                    const date = new Date();
-                    date.setMonth(i);
-                    const monthValue = `${year}-${String(i + 1).padStart(2, '0')}`;
+                {(() => {
+                  // Get available year-month combinations from actual payment data
+                  const paymentMonths: string[] = [];
+                  const seen = new Set<string>();
+                  
+                  payments.forEach(payment => {
+                    const paymentDate = new Date(payment.paymentDate);
+                    const year = paymentDate.getFullYear();
+                    const month = paymentDate.getMonth() + 1;
+                    const monthValue = `${year}-${String(month).padStart(2, '0')}`;
+                    
+                    if (!seen.has(monthValue)) {
+                      seen.add(monthValue);
+                      paymentMonths.push(monthValue);
+                    }
+                  });
+                  
+                  // Sort (newest first)
+                  paymentMonths.sort((a, b) => b.localeCompare(a));
+                  
+                  return paymentMonths.map(monthValue => {
+                    const [year, month] = monthValue.split('-').map(Number);
+                    const date = new Date(year, month - 1);
                     return (
                       <SelectItem key={monthValue} value={monthValue}>
                         {date.toLocaleDateString('en-US', { month: 'long' })} {year}
                       </SelectItem>
                     );
-                  })
-                )}
+                  });
+                })()}
               </SelectContent>
             </Select>
           </div>
@@ -669,18 +687,36 @@ export default function Reports() {
                 <SelectValue placeholder="Select Month" />
               </SelectTrigger>
               <SelectContent>
-                {getAvailableYears().flatMap(year => 
-                  Array.from({ length: 12 }, (_, i) => {
-                    const date = new Date();
-                    date.setMonth(i);
-                    const monthValue = `${year}-${String(i + 1).padStart(2, '0')}`;
+                {(() => {
+                  // Get available year-month combinations from actual payment data
+                  const paymentMonths: string[] = [];
+                  const seen = new Set<string>();
+                  
+                  payments.forEach(payment => {
+                    const paymentDate = new Date(payment.paymentDate);
+                    const year = paymentDate.getFullYear();
+                    const month = paymentDate.getMonth() + 1;
+                    const monthValue = `${year}-${String(month).padStart(2, '0')}`;
+                    
+                    if (!seen.has(monthValue)) {
+                      seen.add(monthValue);
+                      paymentMonths.push(monthValue);
+                    }
+                  });
+                  
+                  // Sort (newest first)
+                  paymentMonths.sort((a, b) => b.localeCompare(a));
+                  
+                  return paymentMonths.map(monthValue => {
+                    const [year, month] = monthValue.split('-').map(Number);
+                    const date = new Date(year, month - 1);
                     return (
                       <SelectItem key={monthValue} value={monthValue}>
                         {date.toLocaleDateString('en-US', { month: 'long' })} {year}
                       </SelectItem>
                     );
-                  })
-                )}
+                  });
+                })()}
               </SelectContent>
             </Select>
           </div>

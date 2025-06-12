@@ -245,20 +245,25 @@ export default function MemberPortal() {
                 <SelectItem value="all">All Months</SelectItem>
                 {(() => {
                   // Get available year-month combinations from actual payment data
-                  const paymentMonths = new Set<string>();
+                  const paymentMonths: string[] = [];
+                  const seen = new Set<string>();
+                  
                   payments.forEach(payment => {
                     const paymentDate = new Date(payment.paymentDate);
                     const year = paymentDate.getFullYear();
                     const month = paymentDate.getMonth() + 1;
-                    paymentMonths.add(`${year}-${String(month).padStart(2, '0')}`);
+                    const monthValue = `${year}-${String(month).padStart(2, '0')}`;
+                    
+                    if (!seen.has(monthValue)) {
+                      seen.add(monthValue);
+                      paymentMonths.push(monthValue);
+                    }
                   });
                   
-                  // Convert to array and sort (newest first)
-                  const monthsArray: string[] = [];
-                  paymentMonths.forEach(month => monthsArray.push(month));
-                  monthsArray.sort((a, b) => b.localeCompare(a));
+                  // Sort (newest first)
+                  paymentMonths.sort((a, b) => b.localeCompare(a));
                   
-                  return monthsArray.map(monthValue => {
+                  return paymentMonths.map(monthValue => {
                     const [year, month] = monthValue.split('-').map(Number);
                     const date = new Date(year, month - 1);
                     return (
@@ -569,19 +574,25 @@ export default function MemberPortal() {
                   <SelectContent>
                     {(() => {
                       // Get available year-month combinations from actual payment data
-                      const paymentMonths = new Set<string>();
+                      const paymentMonths: string[] = [];
+                      const seen = new Set<string>();
+                      
                       payments.forEach(payment => {
                         const paymentDate = new Date(payment.paymentDate);
                         const year = paymentDate.getFullYear();
                         const month = paymentDate.getMonth() + 1;
-                        paymentMonths.add(`${year}-${String(month).padStart(2, '0')}`);
+                        const monthValue = `${year}-${String(month).padStart(2, '0')}`;
+                        
+                        if (!seen.has(monthValue)) {
+                          seen.add(monthValue);
+                          paymentMonths.push(monthValue);
+                        }
                       });
                       
-                      // Convert to array and sort (newest first)  
-                      const monthsArray: string[] = [...paymentMonths];
-                      monthsArray.sort((a, b) => b.localeCompare(a));
+                      // Sort (newest first)
+                      paymentMonths.sort((a, b) => b.localeCompare(a));
                       
-                      return monthsArray.map(monthValue => {
+                      return paymentMonths.map(monthValue => {
                         const [year, month] = monthValue.split('-').map(Number);
                         const date = new Date(year, month - 1);
                         return (
