@@ -12,7 +12,7 @@ const loginSchema = z.object({
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
-  app.post("/api/login", async (req, res) => {
+  app.post("/api/auth/login", async (req, res) => {
     try {
       const { username, password, accountType } = loginSchema.parse(req.body);
       
