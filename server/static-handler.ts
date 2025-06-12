@@ -8,7 +8,7 @@ export function setupStaticFiles(app: Express) {
     path.join(process.cwd(), "server/public"),
     path.join(process.cwd(), "dist/public"),
     path.join(process.cwd(), "public"),
-    path.join(__dirname, "public")
+    path.join(import.meta.dirname, "public")
   ];
 
   // Find the first existing static directory
