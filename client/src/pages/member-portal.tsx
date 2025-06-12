@@ -45,7 +45,7 @@ export default function MemberPortal() {
 
   // Calculate monthly statistics for all members
   const getMonthlyStats = () => {
-    const monthlyStats = [];
+    const monthlyStats: any[] = [];
     
     // Get available years from payment data
     const paymentYears = payments.map(payment => new Date(payment.paymentDate).getFullYear());
