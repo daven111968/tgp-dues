@@ -194,6 +194,7 @@ create_react_app() {
   "name": "tgp-dues-management",
   "version": "1.0.0",
   "description": "TGP Rahugan CBC Chapter Dues Management System",
+  "type": "module",
   "main": "server.js",
   "scripts": {
     "build": "vite build",
@@ -213,6 +214,7 @@ create_react_app() {
     "tailwind-merge": "^1.14.0"
   },
   "devDependencies": {
+    "@types/node": "^20.5.0",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "@vitejs/plugin-react": "^4.0.3",
@@ -226,7 +228,7 @@ create_react_app() {
 EOF
 
     # Create Vite config
-    cat > vite.config.ts << 'EOF'
+    cat > vite.config.js << 'EOF'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
@@ -235,7 +237,7 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(path.dirname(''), "./src"),
     },
   },
   build: {
@@ -246,9 +248,9 @@ export default defineConfig({
 EOF
 
     # Create Tailwind config
-    cat > tailwind.config.js << 'EOF'
+    cat > tailwind.config.cjs << 'EOF'
 /** @type {import('tailwindcss').Config} */
-export default {
+module.exports = {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -270,8 +272,8 @@ export default {
 EOF
 
     # Create PostCSS config
-    cat > postcss.config.js << 'EOF'
-export default {
+    cat > postcss.config.cjs << 'EOF'
+module.exports = {
   plugins: {
     tailwindcss: {},
     autoprefixer: {},
@@ -305,6 +307,20 @@ EOF
   },
   "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]
+}
+EOF
+
+    # Create TypeScript Node config
+    cat > tsconfig.node.json << 'EOF'
+{
+  "compilerOptions": {
+    "composite": true,
+    "skipLibCheck": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["vite.config.js"]
 }
 EOF
 
@@ -671,10 +687,12 @@ setup_application() {
     
     # Create production server
     cat > server.js << 'EOF'
-const express = require('express');
-const path = require('path');
-const { Pool } = require('pg');
-const cors = require('cors');
+import express from 'express';
+import path from 'path';
+import pg from 'pg';
+import cors from 'cors';
+
+const { Pool } = pg;
 
 const app = express();
 const PORT = process.env.PORT || 5000;
