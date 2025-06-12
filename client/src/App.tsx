@@ -61,7 +61,6 @@ function AuthenticatedApp() {
           <Route path="/activities" component={() => <Activities />} />
           <Route path="/reports" component={() => <Reports />} />
           <Route path="/settings" component={() => <Settings />} />
-          <Route path="/member-portal" component={() => <MemberPortal />} />
           <Route component={NotFound} />
         </Switch>
       </div>
