@@ -10,7 +10,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Calendar, Target, Users, TrendingUp } from "lucide-react";
+import { Plus, Calendar, Target, Users, TrendingUp, Download } from "lucide-react";
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { apiRequest } from "@/lib/queryClient";
@@ -146,6 +148,145 @@ export default function Activities() {
     setIsContributionModalOpen(true);
   };
 
+  const exportActivitiesReport = () => {
+    try {
+      console.log('Activities export function called');
+      const doc = new jsPDF();
+      const today = new Date();
+      
+      // Header
+      doc.setFontSize(20);
+      doc.setTextColor(40, 40, 40);
+      doc.text('Activities & Contributions Report', 105, 25, { align: 'center' });
+      
+      // Date
+      doc.setFontSize(10);
+      doc.setTextColor(100, 100, 100);
+      doc.text(`Generated: ${today.toLocaleDateString()}`, 105, 35, { align: 'center' });
+      
+      let yPos = 50;
+      
+      // Summary Statistics
+      doc.setFontSize(14);
+      doc.setTextColor(40, 40, 40);
+      doc.text('Summary Statistics', 20, yPos);
+      yPos += 10;
+      
+      const totalRaised = activities.reduce((sum, a) => sum + parseFloat(a.currentAmount), 0);
+      const totalTarget = activities.reduce((sum, a) => sum + parseFloat(a.targetAmount), 0);
+      const contributors = new Set(contributions.map(c => c.memberId)).size;
+      
+      const summaryData = [
+        ['Total Activities', activities.length.toString()],
+        ['Total Target Amount', `₱${totalTarget.toLocaleString()}`],
+        ['Total Raised', `₱${totalRaised.toLocaleString()}`],
+        ['Total Contributors', contributors.toString()],
+        ['Total Contributions', contributions.length.toString()]
+      ];
+      
+      autoTable(doc, {
+        startY: yPos,
+        head: [['Metric', 'Value']],
+        body: summaryData,
+        theme: 'grid',
+        styles: { fontSize: 10 },
+        headStyles: { fillColor: [41, 128, 185] },
+        margin: { left: 20, right: 20 }
+      });
+      
+      yPos = (doc as any).lastAutoTable.finalY + 20;
+      
+      // Activities Table
+      if (activities.length > 0) {
+        doc.setFontSize(14);
+        doc.text('Activities Details', 20, yPos);
+        yPos += 10;
+        
+        const activitiesData = activities.map(activity => {
+          const progress = getProgressPercentage(activity.currentAmount, activity.targetAmount);
+          return [
+            activity.name,
+            activity.status.charAt(0).toUpperCase() + activity.status.slice(1),
+            `₱${parseFloat(activity.targetAmount).toLocaleString()}`,
+            `₱${parseFloat(activity.currentAmount).toLocaleString()}`,
+            `${progress.toFixed(1)}%`,
+            formatDate(activity.createdAt)
+          ];
+        });
+        
+        autoTable(doc, {
+          startY: yPos,
+          head: [['Activity Name', 'Status', 'Target', 'Raised', 'Progress', 'Created']],
+          body: activitiesData,
+          theme: 'striped',
+          styles: { fontSize: 8 },
+          headStyles: { fillColor: [41, 128, 185] },
+          margin: { left: 20, right: 20 }
+        });
+        
+        yPos = (doc as any).lastAutoTable.finalY + 20;
+      }
+      
+      // Contributions Table
+      if (contributions.length > 0) {
+        // Check if we need a new page
+        if (yPos > 250) {
+          doc.addPage();
+          yPos = 30;
+        }
+        
+        doc.setFontSize(14);
+        doc.text('Contributions Details', 20, yPos);
+        yPos += 10;
+        
+        const contributionsData = contributions.map(contribution => {
+          const member = members?.find(m => m.id === contribution.memberId);
+          const activity = activities.find(a => a.id === contribution.activityId);
+          return [
+            member?.name || 'Unknown Member',
+            activity?.name || 'Unknown Activity',
+            `₱${parseFloat(contribution.amount).toLocaleString()}`,
+            formatDate(contribution.createdAt),
+            contribution.notes || 'No notes'
+          ];
+        });
+        
+        autoTable(doc, {
+          startY: yPos,
+          head: [['Member Name', 'Activity', 'Amount', 'Date', 'Notes']],
+          body: contributionsData,
+          theme: 'striped',
+          styles: { fontSize: 8 },
+          headStyles: { fillColor: [41, 128, 185] },
+          margin: { left: 20, right: 20 }
+        });
+      }
+      
+      // Footer
+      const pageCount = doc.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(150, 150, 150);
+        doc.text(`Page ${i} of ${pageCount}`, 105, 285, { align: 'center' });
+        doc.text('Tau Gamma Phi Rahugan CBC Chapter - Activities Report', 105, 290, { align: 'center' });
+      }
+      
+      // Save the PDF
+      const filename = `activities-report-${today.toISOString().split('T')[0]}.pdf`;
+      doc.save(filename);
+      
+      console.log('Activities report PDF generated successfully');
+    } catch (error: any) {
+      console.error('Activities export error:', error);
+      toast({
+        title: "Export Error",
+        description: `Failed to generate PDF report: ${error.message || 'Unknown error'}`,
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="flex-1 overflow-auto p-4 sm:p-6">
       <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -154,6 +295,10 @@ export default function Activities() {
           <p className="text-sm sm:text-base text-gray-600">Track fundraising activities and member contributions</p>
         </div>
         <div className="flex space-x-2">
+          <Button variant="outline" onClick={exportActivitiesReport}>
+            <Download className="mr-2 h-4 w-4" />
+            Export Report
+          </Button>
           <Button 
             onClick={() => setIsActivityModalOpen(true)}
             className="flex items-center space-x-2"
@@ -192,9 +337,9 @@ export default function Activities() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Target</p>
+                <p className="text-sm font-medium text-gray-600">Amount Due per Member</p>
                 <p className="text-3xl font-bold text-gray-900">
-                  ₱{activities.reduce((sum, a) => sum + parseFloat(a.targetAmount), 0).toLocaleString()}
+                  ₱{members && members.length > 0 ? (activities.reduce((sum, a) => sum + parseFloat(a.targetAmount), 0) / members.length).toLocaleString() : '0'}
                 </p>
               </div>
               <Target className="h-8 w-8 text-green-500" />
