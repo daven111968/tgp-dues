@@ -134,8 +134,10 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
 
   const handleClose = () => {
     setName("");
+    setAliasName("");
     setEmail("");
     setBatchNumber("");
+    setBatchName("");
     setStatus("active");
     onClose();
   };
@@ -162,6 +164,16 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
           </div>
           
           <div>
+            <Label htmlFor="aliasName">Alias Name</Label>
+            <Input
+              id="aliasName"
+              value={aliasName}
+              onChange={(e) => setAliasName(e.target.value)}
+              placeholder="Enter alias/nickname (optional)"
+            />
+          </div>
+          
+          <div>
             <Label htmlFor="email">Email *</Label>
             <Input
               id="email"
@@ -181,6 +193,16 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
               onChange={(e) => setBatchNumber(e.target.value)}
               placeholder="Batch-2024"
               required
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="batchName">Batch Name</Label>
+            <Input
+              id="batchName"
+              value={batchName}
+              onChange={(e) => setBatchName(e.target.value)}
+              placeholder="Enter batch name (optional)"
             />
           </div>
           

@@ -256,12 +256,22 @@ export default function Members() {
                               <Users className="h-5 w-5 text-gray-600" />
                             </div>
                             <div>
-                              <div className="text-sm font-medium text-gray-900">{member.name}</div>
+                              <div className="text-sm font-medium text-gray-900">
+                                {member.name}
+                                {member.aliasName && (
+                                  <span className="text-gray-500 font-normal"> ({member.aliasName})</span>
+                                )}
+                              </div>
                               <div className="text-sm text-gray-500">{member.email}</div>
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className="text-sm text-gray-900">{member.batchNumber}</TableCell>
+                        <TableCell className="text-sm text-gray-900">
+                          {member.batchNumber}
+                          {member.batchName && (
+                            <div className="text-xs text-gray-500">{member.batchName}</div>
+                          )}
+                        </TableCell>
                         <TableCell>
                           {getStatusBadge(paymentStatus.status)}
                         </TableCell>
@@ -339,8 +349,16 @@ export default function Members() {
                       <Users className="h-6 w-6 text-blue-600" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold">{viewingMember.name}</h3>
-                      <p className="text-gray-600">{viewingMember.batchNumber}</p>
+                      <h3 className="text-xl font-bold">
+                        {viewingMember.name}
+                        {viewingMember.aliasName && (
+                          <span className="text-gray-500 font-normal text-lg"> ({viewingMember.aliasName})</span>
+                        )}
+                      </h3>
+                      <p className="text-gray-600">
+                        {viewingMember.batchNumber}
+                        {viewingMember.batchName && ` - ${viewingMember.batchName}`}
+                      </p>
                     </div>
                   </CardTitle>
                 </CardHeader>
@@ -449,7 +467,7 @@ export default function Members() {
                               <TableRow key={payment.id}>
                                 <TableCell>{formatDate(payment.paymentDate)}</TableCell>
                                 <TableCell className="font-medium">₱{parseFloat(payment.amount).toLocaleString()}</TableCell>
-                                <TableCell>{payment.paymentPeriod}</TableCell>
+                                <TableCell>Monthly</TableCell>
                                 <TableCell>{payment.notes || '-'}</TableCell>
                               </TableRow>
                             ))}
