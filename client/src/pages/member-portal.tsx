@@ -219,9 +219,8 @@ export default function MemberPortal() {
                 <TableRow>
                   <TableHead>Month</TableHead>
                   <TableHead className="text-center">Total Members</TableHead>
-                  <TableHead className="text-center">Paid in Full</TableHead>
-                  <TableHead className="text-center">Partial Payment</TableHead>
-                  <TableHead className="text-center">Pending</TableHead>
+                  <TableHead className="text-center">Paid</TableHead>
+                  <TableHead className="text-center">Unpaid</TableHead>
                   <TableHead className="text-center">Payment Rate</TableHead>
                   <TableHead className="text-right">Total Collected</TableHead>
                 </TableRow>
@@ -233,13 +232,6 @@ export default function MemberPortal() {
                     <TableCell className="text-center">{stat.totalMembers}</TableCell>
                     <TableCell className="text-center">
                       <Badge className="bg-green-100 text-green-800">{stat.paidMembers}</Badge>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {stat.partialMembers > 0 ? (
-                        <Badge className="bg-yellow-100 text-yellow-800">{stat.partialMembers}</Badge>
-                      ) : (
-                        <span className="text-gray-400">-</span>
-                      )}
                     </TableCell>
                     <TableCell className="text-center">
                       {stat.pendingMembers > 0 ? (
