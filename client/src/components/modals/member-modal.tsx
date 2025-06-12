@@ -43,8 +43,7 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
     mutationFn: async (memberData: {
       name: string;
       email: string;
-      studentId: string;
-      yearLevel: string;
+      batchNumber: string;
       status: string;
     }) => {
       const response = await apiRequest('POST', '/api/members', memberData);
@@ -72,8 +71,7 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
     mutationFn: async (memberData: {
       name: string;
       email: string;
-      studentId: string;
-      yearLevel: string;
+      batchNumber: string;
       status: string;
     }) => {
       const response = await apiRequest('PUT', `/api/members/${member!.id}`, memberData);
@@ -99,7 +97,7 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!name || !email || !studentId || !yearLevel) {
+    if (!name || !email || !batchNumber) {
       toast({
         title: "Error",
         description: "Please fill in all required fields",
@@ -111,8 +109,7 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
     const memberData = {
       name: name.trim(),
       email: email.trim(),
-      studentId: studentId.trim(),
-      yearLevel,
+      batchNumber: batchNumber.trim(),
       status,
     };
 
@@ -126,8 +123,7 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
   const handleClose = () => {
     setName("");
     setEmail("");
-    setStudentId("");
-    setYearLevel("");
+    setBatchNumber("");
     setStatus("active");
     onClose();
   };
@@ -166,31 +162,14 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
           </div>
           
           <div>
-            <Label htmlFor="studentId">Student ID *</Label>
+            <Label htmlFor="batchNumber">Batch Number *</Label>
             <Input
-              id="studentId"
-              value={studentId}
-              onChange={(e) => setStudentId(e.target.value)}
-              placeholder="2024-00001"
+              id="batchNumber"
+              value={batchNumber}
+              onChange={(e) => setBatchNumber(e.target.value)}
+              placeholder="Batch-2024"
               required
             />
-          </div>
-          
-          <div>
-            <Label htmlFor="yearLevel">Year Level *</Label>
-            <Select value={yearLevel} onValueChange={setYearLevel}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select Year Level" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1st Year">1st Year</SelectItem>
-                <SelectItem value="2nd Year">2nd Year</SelectItem>
-                <SelectItem value="3rd Year">3rd Year</SelectItem>
-                <SelectItem value="4th Year">4th Year</SelectItem>
-                <SelectItem value="5th Year">5th Year</SelectItem>
-                <SelectItem value="Graduate">Graduate</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
           
           <div>

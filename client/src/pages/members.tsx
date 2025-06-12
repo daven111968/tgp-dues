@@ -84,7 +84,7 @@ export default function Members() {
   const filteredMembers = members.filter(member => {
     const matchesSearch = member.name.toLowerCase().includes(search.toLowerCase()) ||
                          member.email.toLowerCase().includes(search.toLowerCase()) ||
-                         member.studentId.toLowerCase().includes(search.toLowerCase());
+                         member.batchNumber.toLowerCase().includes(search.toLowerCase());
     
     if (!matchesSearch) return false;
     
@@ -185,8 +185,7 @@ export default function Members() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Member</TableHead>
-                  <TableHead>Student ID</TableHead>
-                  <TableHead>Year Level</TableHead>
+                  <TableHead>Batch Number</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Last Payment</TableHead>
                   <TableHead>Actions</TableHead>
@@ -195,7 +194,7 @@ export default function Members() {
               <TableBody>
                 {filteredMembers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                    <TableCell colSpan={5} className="text-center py-8 text-gray-500">
                       No members found
                     </TableCell>
                   </TableRow>
@@ -216,8 +215,7 @@ export default function Members() {
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className="text-sm text-gray-900">{member.studentId}</TableCell>
-                        <TableCell className="text-sm text-gray-900">{member.yearLevel}</TableCell>
+                        <TableCell className="text-sm text-gray-900">{member.batchNumber}</TableCell>
                         <TableCell>
                           {getStatusBadge(paymentStatus.status)}
                         </TableCell>
