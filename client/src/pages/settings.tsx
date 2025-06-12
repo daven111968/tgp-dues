@@ -171,30 +171,142 @@ export default function Settings() {
     updateAccountMutation.mutate(data);
   };
 
-  // Export data functionality
-  const exportData = () => {
-    const exportData = {
-      members,
-      payments,
-      chapterInfo,
-      exportDate: new Date().toISOString()
-    };
-
-    const dataStr = JSON.stringify(exportData, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `tgp-chapter-backup-${new Date().toISOString().split('T')[0]}.json`;
-    link.click();
-    
-    URL.revokeObjectURL(url);
-    
-    toast({
-      title: "Data Exported",
-      description: "Chapter data has been exported successfully.",
-    });
+  // Export data functionality as PDF
+  const exportData = async () => {
+    try {
+      const { jsPDF } = await import('jspdf');
+      await import('jspdf-autotable');
+      
+      const doc = new jsPDF();
+      const currentDate = new Date().toLocaleDateString();
+      
+      // Header
+      doc.setFontSize(20);
+      doc.text('Chapter Data Export Report', 20, 20);
+      
+      doc.setFontSize(12);
+      doc.text(`Export Date: ${currentDate}`, 20, 35);
+      doc.text(`${chapterInfo?.chapterName || 'Tau Gamma Phi Chapter'}`, 20, 45);
+      
+      // Chapter Information
+      doc.setFontSize(16);
+      doc.text('Chapter Information', 20, 65);
+      
+      doc.setFontSize(10);
+      let yPos = 75;
+      doc.text(`Chapter Name: ${chapterInfo?.chapterName || 'Not set'}`, 20, yPos);
+      yPos += 8;
+      doc.text(`Address: ${chapterInfo?.chapterAddress || 'Not set'}`, 20, yPos);
+      yPos += 8;
+      doc.text(`Contact Email: ${chapterInfo?.contactEmail || 'Not set'}`, 20, yPos);
+      yPos += 8;
+      doc.text(`Contact Phone: ${chapterInfo?.contactPhone || 'Not set'}`, 20, yPos);
+      yPos += 8;
+      doc.text(`Treasurer: ${chapterInfo?.treasurerName || 'Not set'}`, 20, yPos);
+      yPos += 8;
+      doc.text(`Treasurer Email: ${chapterInfo?.treasurerEmail || 'Not set'}`, 20, yPos);
+      
+      // Members Summary
+      yPos += 20;
+      doc.setFontSize(16);
+      doc.text('Members Summary', 20, yPos);
+      
+      yPos += 15;
+      doc.setFontSize(10);
+      doc.text(`Total Members: ${members.length}`, 20, yPos);
+      yPos += 8;
+      doc.text(`Total Payments: ${payments.length}`, 20, yPos);
+      yPos += 8;
+      const totalAmount = payments.reduce((sum, payment) => sum + parseFloat(payment.amount), 0);
+      doc.text(`Total Amount Collected: ₱${totalAmount.toLocaleString()}`, 20, yPos);
+      
+      // Members Table
+      if (members.length > 0) {
+        yPos += 20;
+        doc.setFontSize(16);
+        doc.text('Members List', 20, yPos);
+        
+        const memberTableData = members.map(member => [
+          member.name,
+          member.batchNumber || 'N/A',
+          member.email,
+          member.status,
+          new Date(member.joinedAt).toLocaleDateString()
+        ]);
+        
+        (doc as any).autoTable({
+          startY: yPos + 10,
+          head: [['Name', 'Batch Number', 'Email', 'Status', 'Joined Date']],
+          body: memberTableData,
+          theme: 'striped',
+          styles: { fontSize: 8 },
+          headStyles: { fillColor: [41, 128, 185] }
+        });
+        
+        yPos = (doc as any).lastAutoTable.finalY + 20;
+      }
+      
+      // Recent Payments Table
+      if (payments.length > 0) {
+        // Add new page if needed
+        if (yPos > 250) {
+          doc.addPage();
+          yPos = 20;
+        }
+        
+        doc.setFontSize(16);
+        doc.text('Recent Payments', 20, yPos);
+        
+        const recentPayments = payments
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          .slice(0, 20);
+        
+        const paymentTableData = recentPayments.map(payment => {
+          const member = members.find(m => m.id === payment.memberId);
+          return [
+            member?.name || 'Unknown',
+            `₱${parseFloat(payment.amount).toLocaleString()}`,
+            new Date(payment.paymentDate).toLocaleDateString(),
+            payment.notes || 'No notes'
+          ];
+        });
+        
+        (doc as any).autoTable({
+          startY: yPos + 10,
+          head: [['Member Name', 'Amount', 'Payment Date', 'Notes']],
+          body: paymentTableData,
+          theme: 'striped',
+          styles: { fontSize: 8 },
+          headStyles: { fillColor: [41, 128, 185] }
+        });
+      }
+      
+      // Footer
+      const pageCount = doc.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.width - 30, doc.internal.pageSize.height - 10);
+      }
+      
+      // Save the PDF
+      doc.save(`tgp-chapter-report-${new Date().toISOString().split('T')[0]}.pdf`);
+      
+      // Update last backup time
+      localStorage.setItem('lastBackup', currentDate);
+      
+      toast({
+        title: "PDF Report Generated",
+        description: "Chapter data has been exported as PDF successfully.",
+      });
+    } catch (error) {
+      console.error('Export error:', error);
+      toast({
+        title: "Export Error",
+        description: "Failed to generate PDF report. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleFileImport = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -537,7 +649,7 @@ export default function Settings() {
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
               <Button onClick={exportData} className="flex items-center justify-center space-x-2 touch-friendly">
                 <Download className="h-4 w-4" />
-                <span>Export Backup</span>
+                <span>Export PDF Report</span>
               </Button>
               <div className="relative">
                 <Button variant="outline" className="flex items-center justify-center space-x-2 touch-friendly">
