@@ -6,12 +6,13 @@ interface User {
   id: number;
   username: string;
   name: string;
-  position: string;
+  position?: string;
+  accountType: 'admin' | 'member';
 }
 
 interface AuthContextType {
   user: User | null;
-  login: (username: string, password: string) => Promise<void>;
+  login: (username: string, password: string, accountType?: 'admin' | 'member') => Promise<void>;
   logout: () => void;
   isLoading: boolean;
 }

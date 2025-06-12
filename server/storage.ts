@@ -13,6 +13,7 @@ export interface IStorage {
   getMembers(): Promise<Member[]>;
   getMember(id: number): Promise<Member | undefined>;
   getMemberByBatchNumber(batchNumber: string): Promise<Member | undefined>;
+  getMemberByUsername(username: string): Promise<Member | undefined>;
   createMember(member: InsertMember): Promise<Member>;
   updateMember(id: number, member: Partial<InsertMember>): Promise<Member | undefined>;
   deleteMember(id: number): Promise<boolean>;
@@ -175,6 +176,11 @@ export class DatabaseStorage implements IStorage {
 
   async getMemberByBatchNumber(batchNumber: string): Promise<Member | undefined> {
     const [member] = await db.select().from(members).where(eq(members.batchNumber, batchNumber));
+    return member || undefined;
+  }
+
+  async getMemberByUsername(username: string): Promise<Member | undefined> {
+    const [member] = await db.select().from(members).where(eq(members.username, username));
     return member || undefined;
   }
 

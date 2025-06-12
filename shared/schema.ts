@@ -21,6 +21,9 @@ export const members = pgTable("members", {
   memberType: text("member_type").notNull().default("pure_blooded"), // pure_blooded, welcome
   welcomingDate: timestamp("welcoming_date"),
   status: text("status").notNull().default("active"), // active, inactive
+  // Member login credentials
+  username: text("username").unique(),
+  password: text("password"),
 });
 
 export const payments = pgTable("payments", {
