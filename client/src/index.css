@@ -72,47 +72,47 @@
 
 :root {
   --background: hsl(0, 0%, 100%);
-  --foreground: hsl(20, 14.3%, 4.1%);
-  --muted: hsl(60, 4.8%, 95.9%);
-  --muted-foreground: hsl(25, 5.3%, 44.7%);
+  --foreground: hsl(0, 0%, 0%);
+  --muted: hsl(45, 100%, 95%);
+  --muted-foreground: hsl(0, 0%, 25%);
   --popover: hsl(0, 0%, 100%);
-  --popover-foreground: hsl(20, 14.3%, 4.1%);
+  --popover-foreground: hsl(0, 0%, 0%);
   --card: hsl(0, 0%, 100%);
-  --card-foreground: hsl(20, 14.3%, 4.1%);
-  --border: hsl(20, 5.9%, 90%);
-  --input: hsl(20, 5.9%, 90%);
-  --primary: hsl(207, 90%, 54%);
-  --primary-foreground: hsl(211, 100%, 99%);
-  --secondary: hsl(60, 4.8%, 95.9%);
-  --secondary-foreground: hsl(24, 9.8%, 10%);
-  --accent: hsl(60, 4.8%, 95.9%);
-  --accent-foreground: hsl(24, 9.8%, 10%);
+  --card-foreground: hsl(0, 0%, 0%);
+  --border: hsl(45, 100%, 85%);
+  --input: hsl(45, 100%, 90%);
+  --primary: hsl(45, 100%, 50%);
+  --primary-foreground: hsl(0, 0%, 0%);
+  --secondary: hsl(45, 100%, 95%);
+  --secondary-foreground: hsl(0, 0%, 0%);
+  --accent: hsl(45, 100%, 90%);
+  --accent-foreground: hsl(0, 0%, 0%);
   --destructive: hsl(0, 84.2%, 60.2%);
-  --destructive-foreground: hsl(60, 9.1%, 97.8%);
-  --ring: hsl(20, 14.3%, 4.1%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --ring: hsl(45, 100%, 50%);
   --radius: 0.5rem;
 }
 
 .dark {
-  --background: hsl(240, 10%, 3.9%);
-  --foreground: hsl(0, 0%, 98%);
-  --muted: hsl(240, 3.7%, 15.9%);
-  --muted-foreground: hsl(240, 5%, 64.9%);
-  --popover: hsl(240, 10%, 3.9%);
-  --popover-foreground: hsl(0, 0%, 98%);
-  --card: hsl(240, 10%, 3.9%);
-  --card-foreground: hsl(0, 0%, 98%);
-  --border: hsl(240, 3.7%, 15.9%);
-  --input: hsl(240, 3.7%, 15.9%);
-  --primary: hsl(207, 90%, 54%);
-  --primary-foreground: hsl(211, 100%, 99%);
-  --secondary: hsl(240, 3.7%, 15.9%);
-  --secondary-foreground: hsl(0, 0%, 98%);
-  --accent: hsl(240, 3.7%, 15.9%);
-  --accent-foreground: hsl(0, 0%, 98%);
+  --background: hsl(0, 0%, 0%);
+  --foreground: hsl(45, 100%, 85%);
+  --muted: hsl(0, 0%, 10%);
+  --muted-foreground: hsl(45, 100%, 70%);
+  --popover: hsl(0, 0%, 5%);
+  --popover-foreground: hsl(45, 100%, 85%);
+  --card: hsl(0, 0%, 5%);
+  --card-foreground: hsl(45, 100%, 85%);
+  --border: hsl(0, 0%, 15%);
+  --input: hsl(0, 0%, 10%);
+  --primary: hsl(45, 100%, 60%);
+  --primary-foreground: hsl(0, 0%, 0%);
+  --secondary: hsl(0, 0%, 10%);
+  --secondary-foreground: hsl(45, 100%, 85%);
+  --accent: hsl(0, 0%, 15%);
+  --accent-foreground: hsl(45, 100%, 85%);
   --destructive: hsl(0, 62.8%, 30.6%);
-  --destructive-foreground: hsl(0, 0%, 98%);
-  --ring: hsl(240, 4.9%, 83.9%);
+  --destructive-foreground: hsl(45, 100%, 85%);
+  --ring: hsl(45, 100%, 60%);
   --radius: 0.5rem;
 }
 
@@ -123,5 +123,49 @@
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+/* Custom gold and black theme overrides */
+@layer components {
+  /* Enhanced primary button styling */
+  .btn-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90;
+    background: linear-gradient(135deg, hsl(45, 100%, 50%) 0%, hsl(45, 100%, 45%) 100%);
+    box-shadow: 0 4px 6px -1px rgba(255, 215, 0, 0.1), 0 2px 4px -1px rgba(255, 215, 0, 0.06);
+  }
+  
+  .btn-primary:hover {
+    background: linear-gradient(135deg, hsl(45, 100%, 45%) 0%, hsl(45, 100%, 40%) 100%);
+    box-shadow: 0 10px 15px -3px rgba(255, 215, 0, 0.1), 0 4px 6px -2px rgba(255, 215, 0, 0.05);
+  }
+
+  /* Card styling with gold accents */
+  .card-gold {
+    @apply bg-card text-card-foreground border-border;
+    border-left: 4px solid hsl(45, 100%, 50%);
+  }
+
+  /* Navigation styling */
+  .nav-gold {
+    background: linear-gradient(90deg, hsl(0, 0%, 0%) 0%, hsl(0, 0%, 5%) 100%);
+    border-bottom: 2px solid hsl(45, 100%, 50%);
+  }
+
+  /* Status badges with gold accents */
+  .badge-gold {
+    @apply bg-primary/10 text-primary border border-primary/20;
+  }
+
+  /* Form inputs with gold focus */
+  .input-gold:focus {
+    @apply ring-2 ring-primary ring-offset-2;
+    border-color: hsl(45, 100%, 50%);
+  }
+
+  /* Table headers with gold styling */
+  .table-header-gold {
+    background: linear-gradient(90deg, hsl(45, 100%, 50%) 0%, hsl(45, 100%, 45%) 100%);
+    @apply text-black font-semibold;
   }
 }
