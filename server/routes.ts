@@ -141,6 +141,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete("/api/payments/clear", async (req, res) => {
+    try {
+      const success = await storage.clearAllPayments();
+      if (success) {
+        res.json({ message: "All payments cleared successfully" });
+      } else {
+        res.status(500).json({ error: "Failed to clear payments" });
+      }
+    } catch (error) {
+      console.error('Error clearing payments:', error);
+      res.status(500).json({ error: "Failed to clear payments" });
+    }
+  });
+
   // Dashboard stats
   app.get("/api/stats", async (req, res) => {
     try {
