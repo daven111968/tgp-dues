@@ -175,6 +175,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Chapter info routes
+  app.get("/api/chapter-info", async (req, res) => {
+    try {
+      const chapterInfo = await storage.getChapterInfo();
+      res.json(chapterInfo);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch chapter info" });
+    }
+  });
+
+  app.post("/api/chapter-info", async (req, res) => {
+    try {
+      const chapterData = insertChapterInfoSchema.parse(req.body);
+      const chapterInfo = await storage.updateChapterInfo(chapterData);
+      res.json(chapterInfo);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid chapter info data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update chapter info" });
+    }
+  });
+
+  // Activities routes
+  app.get("/api/activities", async (req, res) => {
+    try {
+      const activities = await storage.getActivities();
+      res.json(activities);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch activities" });
+    }
+  });
+
+  app.post("/api/activities", async (req, res) => {
+    try {
+      const activityData = insertActivitySchema.parse(req.body);
+      const activity = await storage.createActivity(activityData);
+      res.status(201).json(activity);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid activity data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create activity" });
+    }
+  });
+
+  // Contributions routes
+  app.get("/api/contributions", async (req, res) => {
+    try {
+      const contributions = await storage.getContributions();
+      res.json(contributions);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch contributions" });
+    }
+  });
+
+  app.post("/api/contributions", async (req, res) => {
+    try {
+      const contributionData = insertContributionSchema.parse(req.body);
+      const contribution = await storage.createContribution(contributionData);
+      res.status(201).json(contribution);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid contribution data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create contribution" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

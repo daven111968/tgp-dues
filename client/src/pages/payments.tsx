@@ -96,43 +96,76 @@ export default function Payments() {
       return;
     }
 
-    // Generate report data
+    // Generate comprehensive report data
     const reportData = {
-      reportTitle: `Monthly Payment Report - ${monthFilter || "All Months"}`,
-      generatedDate: new Date().toISOString(),
-      totalPayments: filteredPayments.length,
-      totalAmount: totalAmount,
-      averagePayment: filteredPayments.length > 0 ? totalAmount / filteredPayments.length : 0,
+      reportTitle: `TGP Rahugan CBC Chapter - Monthly Payment Report`,
+      period: monthFilter || "All Months",
+      generatedDate: new Date().toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }),
+      summary: {
+        totalPayments: filteredPayments.length,
+        totalAmount: totalAmount,
+        averagePayment: filteredPayments.length > 0 ? totalAmount / filteredPayments.length : 0,
+        uniqueMembers: new Set(filteredPayments.map(p => p.memberId)).size,
+        dateRange: {
+          earliest: filteredPayments.length > 0 ? 
+            filteredPayments.reduce((earliest, p) => 
+              new Date(p.paymentDate) < new Date(earliest.paymentDate) ? p : earliest
+            ).paymentDate : null,
+          latest: filteredPayments.length > 0 ? 
+            filteredPayments.reduce((latest, p) => 
+              new Date(p.paymentDate) > new Date(latest.paymentDate) ? p : latest
+            ).paymentDate : null
+        }
+      },
       payments: filteredPayments.map(payment => ({
         id: payment.id,
         memberName: getMemberName(payment.memberId),
-        amount: payment.amount,
+        amount: parseFloat(payment.amount),
+        formattedAmount: `₱${parseFloat(payment.amount).toLocaleString()}`,
         paymentDate: formatDate(payment.paymentDate),
         notes: payment.notes || "No notes",
-        recordedAt: formatTime(payment.createdAt)
+        recordedAt: formatTime(payment.createdAt),
+        monthYear: new Date(payment.paymentDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
       }))
     };
 
-    // Create and download CSV
-    const csvHeaders = "ID,Member Name,Amount,Payment Date,Notes,Recorded At\n";
-    const csvData = reportData.payments
-      .map(p => `${p.id},"${p.memberName}","₱${p.amount}","${p.paymentDate}","${p.notes}","${p.recordedAt}"`)
-      .join("\n");
+    // Create comprehensive CSV with summary
+    const csvContent = [
+      `"${reportData.reportTitle}"`,
+      `"Period: ${reportData.period}"`,
+      `"Generated: ${reportData.generatedDate}"`,
+      `"Total Payments: ${reportData.summary.totalPayments}"`,
+      `"Total Amount: ₱${reportData.summary.totalAmount.toLocaleString()}"`,
+      `"Average Payment: ₱${reportData.summary.averagePayment.toLocaleString()}"`,
+      `"Unique Members: ${reportData.summary.uniqueMembers}"`,
+      `"Date Range: ${reportData.summary.dateRange.earliest ? formatDate(reportData.summary.dateRange.earliest) : 'N/A'} to ${reportData.summary.dateRange.latest ? formatDate(reportData.summary.dateRange.latest) : 'N/A'}"`,
+      "",
+      "Payment Details:",
+      "ID,Member Name,Amount,Payment Date,Month/Year,Notes,Recorded At",
+      ...reportData.payments.map(p => 
+        `${p.id},"${p.memberName}","${p.formattedAmount}","${p.paymentDate}","${p.monthYear}","${p.notes}","${p.recordedAt}"`
+      )
+    ].join("\n");
     
-    const csvContent = csvHeaders + csvData;
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     
     const link = document.createElement('a');
     link.href = url;
-    link.download = `payment-report-${monthFilter || 'all'}-${new Date().toISOString().split('T')[0]}.csv`;
+    link.download = `TGP-Payment-Report-${monthFilter ? monthFilter.replace(/\s+/g, '-') : 'All'}-${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
     
     URL.revokeObjectURL(url);
 
     toast({
       title: "Success",
-      description: "Monthly payment report exported successfully",
+      description: "Comprehensive monthly payment report exported successfully",
     });
   };
 

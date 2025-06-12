@@ -372,7 +372,7 @@ export default function Activities() {
                   <FormItem>
                     <FormLabel>Description</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Enter activity description" {...field} />
+                      <Textarea placeholder="Enter activity description" {...field} value={field.value || ""} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -541,7 +541,7 @@ export default function Activities() {
                   <FormItem>
                     <FormLabel>Notes (Optional)</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Enter any notes" {...field} />
+                      <Textarea placeholder="Enter any notes" {...field} value={field.value || ""} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
