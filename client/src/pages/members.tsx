@@ -91,7 +91,7 @@ export default function Members() {
   // Filter members based on search and status
   const filteredMembers = members.filter(member => {
     const matchesSearch = member.name.toLowerCase().includes(search.toLowerCase()) ||
-                         member.email.toLowerCase().includes(search.toLowerCase()) ||
+                         member.address.toLowerCase().includes(search.toLowerCase()) ||
                          member.batchNumber.toLowerCase().includes(search.toLowerCase());
     
     if (!matchesSearch) return false;
@@ -368,8 +368,8 @@ export default function Members() {
                       <div className="flex items-center space-x-3">
                         <Mail className="h-4 w-4 text-gray-500" />
                         <div>
-                          <p className="text-sm font-medium text-gray-500">Email</p>
-                          <p className="text-sm text-gray-900">{viewingMember.email}</p>
+                          <p className="text-sm font-medium text-gray-500">Address</p>
+                          <p className="text-sm text-gray-900">{viewingMember.address}</p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-3">

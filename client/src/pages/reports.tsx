@@ -131,7 +131,7 @@ export default function Reports() {
         const paymentDate = new Date(payment.paymentDate);
         
         if (!currentLastPayment || paymentDate > new Date(currentLastPayment)) {
-          memberData[payment.memberId].lastPayment = payment.paymentDate;
+          memberData[payment.memberId].lastPayment = paymentDate.toISOString();
         }
       }
     });

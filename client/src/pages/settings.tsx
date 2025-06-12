@@ -233,14 +233,14 @@ export default function Settings() {
         const memberTableData = members.map(member => [
           member.name,
           member.batchNumber || 'N/A',
-          member.email,
+          member.address,
           member.status,
           new Date(member.joinedAt).toLocaleDateString()
         ]);
         
         autoTable(doc, {
           startY: yPos + 10,
-          head: [['Name', 'Batch Number', 'Email', 'Status', 'Joined Date']],
+          head: [['Name', 'Batch Number', 'Address', 'Status', 'Joined Date']],
           body: memberTableData,
           theme: 'striped',
           styles: { fontSize: 8 },
