@@ -111,14 +111,13 @@ export default function MemberPortal() {
 
     return members.map(member => {
       const totalPaid = memberPaymentTotals.get(member.id) || 0;
-      const status = totalPaid >= 100 ? 'paid' : 'pending';
+      const status = totalPaid > 0 ? 'paid' : 'unpaid';
 
       return {
         id: member.id,
         name: member.name,
         totalPaid,
-        status,
-        remaining: Math.max(0, 100 - totalPaid)
+        status
       };
     });
   };
@@ -534,15 +533,15 @@ export default function MemberPortal() {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div className="bg-green-50 p-4 rounded-lg">
-                  <p className="text-sm font-medium text-green-600">Paid (₱100)</p>
+                  <p className="text-sm font-medium text-green-600">Paid</p>
                   <p className="text-2xl font-bold text-green-900">
                     {selectedMonthMemberDetails.filter(member => member.status === 'paid').length}
                   </p>
                 </div>
                 <div className="bg-red-50 p-4 rounded-lg">
-                  <p className="text-sm font-medium text-red-600">Pending</p>
+                  <p className="text-sm font-medium text-red-600">Unpaid</p>
                   <p className="text-2xl font-bold text-red-900">
-                    {selectedMonthMemberDetails.filter(member => member.status === 'pending').length}
+                    {selectedMonthMemberDetails.filter(member => member.status === 'unpaid').length}
                   </p>
                 </div>
               </div>

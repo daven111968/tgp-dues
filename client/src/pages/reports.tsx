@@ -108,14 +108,13 @@ export default function Reports() {
 
     return members.map(member => {
       const totalPaid = memberPaymentTotals.get(member.id) || 0;
-      const status = totalPaid >= 100 ? 'paid' : 'pending';
+      const status = totalPaid > 0 ? 'paid' : 'unpaid';
 
       return {
         id: member.id,
         name: member.name,
         totalPaid,
-        status,
-        remaining: Math.max(0, 100 - totalPaid)
+        status
       };
     });
   };
@@ -643,15 +642,15 @@ export default function Reports() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div className="bg-green-50 p-4 rounded-lg">
-              <p className="text-sm font-medium text-green-600">Paid (₱100)</p>
+              <p className="text-sm font-medium text-green-600">Paid</p>
               <p className="text-2xl font-bold text-green-900">
                 {selectedMonthDetails.filter(member => member.status === 'paid').length}
               </p>
             </div>
             <div className="bg-red-50 p-4 rounded-lg">
-              <p className="text-sm font-medium text-red-600">Pending</p>
+              <p className="text-sm font-medium text-red-600">Unpaid</p>
               <p className="text-2xl font-bold text-red-900">
-                {selectedMonthDetails.filter(member => member.status === 'pending').length}
+                {selectedMonthDetails.filter(member => member.status === 'unpaid').length}
               </p>
             </div>
           </div>
@@ -663,14 +662,13 @@ export default function Reports() {
                   <TableHead>Member Name</TableHead>
                   <TableHead className="text-center">Status</TableHead>
                   <TableHead className="text-right">Amount Paid</TableHead>
-                  <TableHead className="text-right">Remaining</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {selectedMonthDetails
                   .sort((a, b) => {
-                    // Sort by status: paid first, then pending
-                    const statusOrder = { paid: 0, pending: 1 } as const;
+                    // Sort by status: paid first, then unpaid
+                    const statusOrder = { paid: 0, unpaid: 1 } as const;
                     const statusA = statusOrder[a.status as keyof typeof statusOrder] ?? 2;
                     const statusB = statusOrder[b.status as keyof typeof statusOrder] ?? 2;
                     return statusA - statusB || a.name.localeCompare(b.name);
@@ -682,19 +680,12 @@ export default function Reports() {
                         {member.status === 'paid' && (
                           <Badge className="bg-green-100 text-green-800">Paid</Badge>
                         )}
-                        {member.status === 'pending' && (
-                          <Badge className="bg-red-100 text-red-800">Pending</Badge>
+                        {member.status === 'unpaid' && (
+                          <Badge className="bg-red-100 text-red-800">Unpaid</Badge>
                         )}
                       </TableCell>
                       <TableCell className="text-right font-mono">
                         ₱{member.totalPaid.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                      </TableCell>
-                      <TableCell className="text-right font-mono">
-                        {member.remaining > 0 ? (
-                          <span className="text-red-600">₱{member.remaining.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
-                        ) : (
-                          <span className="text-green-600">—</span>
-                        )}
                       </TableCell>
                     </TableRow>
                   ))}
