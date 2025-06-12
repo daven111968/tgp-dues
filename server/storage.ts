@@ -1,4 +1,6 @@
 import { users, members, payments, type User, type InsertUser, type Member, type InsertMember, type Payment, type InsertPayment } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -27,164 +29,156 @@ export interface IStorage {
   getRecentPayments(limit?: number): Promise<Array<Payment & { memberName: string }>>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private members: Map<number, Member>;
-  private payments: Map<number, Payment>;
-  private currentUserId: number;
-  private currentMemberId: number;
-  private currentPaymentId: number;
-
+export class DatabaseStorage implements IStorage {
   constructor() {
-    this.users = new Map();
-    this.members = new Map();
-    this.payments = new Map();
-    this.currentUserId = 1;
-    this.currentMemberId = 1;
-    this.currentPaymentId = 1;
-    
-    // Initialize with sample data
+    // Initialize with sample data if needed
     this.initializeData();
   }
 
   private async initializeData() {
-    // Create sample officer
-    await this.createUser({
-      username: "treasurer",
-      password: "password123",
-      name: "Chapter Treasurer",
-      position: "Treasurer"
-    });
-
-    // Create sample members
-    const sampleMembers = [
-      {
-        name: "Juan Dela Cruz",
-        email: "juan.delacruz@cbc.edu.ph",
-        batchNumber: "Batch-2021",
-        status: "active"
-      },
-      {
-        name: "Mark Santos",
-        email: "mark.santos@cbc.edu.ph",
-        batchNumber: "Batch-2021", 
-        status: "active"
-      },
-      {
-        name: "Paolo Rodriguez",
-        email: "paolo.rodriguez@cbc.edu.ph",
-        batchNumber: "Batch-2022",
-        status: "active"
+    try {
+      // Check if users table already has data
+      const existingUsers = await db.select().from(users).limit(1);
+      if (existingUsers.length > 0) {
+        return; // Data already exists
       }
-    ];
 
-    for (const member of sampleMembers) {
-      await this.createMember(member);
+      // Create sample officer
+      await this.createUser({
+        username: "treasurer",
+        password: "password123",
+        name: "Chapter Treasurer",
+        position: "Treasurer"
+      });
+
+      // Create sample members
+      const sampleMembers = [
+        {
+          name: "Juan Dela Cruz",
+          email: "juan.delacruz@cbc.edu.ph",
+          batchNumber: "Batch-2021",
+          status: "active"
+        },
+        {
+          name: "Mark Santos",
+          email: "mark.santos@cbc.edu.ph",
+          batchNumber: "Batch-2021", 
+          status: "active"
+        },
+        {
+          name: "Paolo Rodriguez",
+          email: "paolo.rodriguez@cbc.edu.ph",
+          batchNumber: "Batch-2022",
+          status: "active"
+        }
+      ];
+
+      const createdMembers = [];
+      for (const member of sampleMembers) {
+        const created = await this.createMember(member);
+        createdMembers.push(created);
+      }
+
+      // Create sample payments
+      const now = new Date();
+      const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 15);
+      const twoMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 2, 10);
+
+      if (createdMembers.length >= 3) {
+        await this.createPayment({
+          memberId: createdMembers[0].id,
+          amount: "500.00",
+          paymentDate: thisMonth,
+          notes: "December 2024 dues"
+        });
+
+        await this.createPayment({
+          memberId: createdMembers[1].id,
+          amount: "500.00", 
+          paymentDate: lastMonth,
+          notes: "November 2024 dues"
+        });
+
+        await this.createPayment({
+          memberId: createdMembers[2].id,
+          amount: "500.00",
+          paymentDate: twoMonthsAgo,
+          notes: "October 2024 dues"
+        });
+      }
+    } catch (error) {
+      console.log('Sample data initialization skipped:', error);
     }
-
-    // Create sample payments
-    const now = new Date();
-    const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 15);
-    const twoMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 2, 10);
-
-    await this.createPayment({
-      memberId: 1,
-      amount: "500.00",
-      paymentDate: thisMonth,
-      notes: "December 2024 dues"
-    });
-
-    await this.createPayment({
-      memberId: 2,
-      amount: "500.00", 
-      paymentDate: lastMonth,
-      notes: "November 2024 dues"
-    });
-
-    await this.createPayment({
-      memberId: 3,
-      amount: "500.00",
-      paymentDate: twoMonthsAgo,
-      notes: "October 2024 dues"
-    });
   }
 
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username
-    );
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
     return user;
   }
 
   async getMembers(): Promise<Member[]> {
-    return Array.from(this.members.values());
+    return await db.select().from(members);
   }
 
   async getMember(id: number): Promise<Member | undefined> {
-    return this.members.get(id);
+    const [member] = await db.select().from(members).where(eq(members.id, id));
+    return member || undefined;
   }
 
   async getMemberByBatchNumber(batchNumber: string): Promise<Member | undefined> {
-    return Array.from(this.members.values()).find(
-      (member) => member.batchNumber === batchNumber
-    );
+    const [member] = await db.select().from(members).where(eq(members.batchNumber, batchNumber));
+    return member || undefined;
   }
 
   async createMember(insertMember: InsertMember): Promise<Member> {
-    const id = this.currentMemberId++;
-    const member: Member = { 
-      ...insertMember, 
-      id,
-      status: insertMember.status || "active",
-      joinedAt: new Date()
-    };
-    this.members.set(id, member);
+    const [member] = await db
+      .insert(members)
+      .values(insertMember)
+      .returning();
     return member;
   }
 
   async updateMember(id: number, memberUpdate: Partial<InsertMember>): Promise<Member | undefined> {
-    const member = this.members.get(id);
-    if (!member) return undefined;
-    
-    const updatedMember = { ...member, ...memberUpdate };
-    this.members.set(id, updatedMember);
-    return updatedMember;
+    const [member] = await db
+      .update(members)
+      .set(memberUpdate)
+      .where(eq(members.id, id))
+      .returning();
+    return member || undefined;
   }
 
   async deleteMember(id: number): Promise<boolean> {
-    return this.members.delete(id);
+    const result = await db.delete(members).where(eq(members.id, id));
+    return (result.rowCount || 0) > 0;
   }
 
   async getPayments(): Promise<Payment[]> {
-    return Array.from(this.payments.values());
+    return await db.select().from(payments);
   }
 
   async getPaymentsByMember(memberId: number): Promise<Payment[]> {
-    return Array.from(this.payments.values()).filter(
-      (payment) => payment.memberId === memberId
-    );
+    return await db.select().from(payments).where(eq(payments.memberId, memberId));
   }
 
   async createPayment(insertPayment: InsertPayment): Promise<Payment> {
-    const id = this.currentPaymentId++;
-    const payment: Payment = { 
-      ...insertPayment, 
-      id,
-      notes: insertPayment.notes || null,
-      createdAt: new Date()
-    };
-    this.payments.set(id, payment);
+    const [payment] = await db
+      .insert(payments)
+      .values(insertPayment)
+      .returning();
     return payment;
   }
 
@@ -240,4 +234,4 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
