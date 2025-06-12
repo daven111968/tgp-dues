@@ -74,6 +74,9 @@ install_postgresql() {
 setup_database() {
     print_status "Setting up database..."
     
+    # Change to postgres home directory to avoid permission issues
+    cd /var/lib/postgresql
+    
     # Create database and user
     sudo -u postgres psql << EOF
 CREATE DATABASE $DB_NAME;
@@ -85,8 +88,26 @@ EOF
 
     # Configure PostgreSQL authentication
     print_status "Configuring PostgreSQL authentication..."
-    PG_VERSION=$(sudo -u postgres psql -t -c "SELECT version();" | grep -oP '\d+\.\d+' | head -1)
+    
+    # Find the correct PostgreSQL version and config path
+    PG_VERSION=$(ls /etc/postgresql/ | head -1)
+    if [ -z "$PG_VERSION" ]; then
+        print_error "Could not find PostgreSQL version directory"
+        return 1
+    fi
+    
     PG_CONFIG="/etc/postgresql/$PG_VERSION/main/pg_hba.conf"
+    
+    if [ ! -f "$PG_CONFIG" ]; then
+        print_error "PostgreSQL config file not found at $PG_CONFIG"
+        # Try alternative paths
+        PG_CONFIG=$(find /etc/postgresql -name "pg_hba.conf" 2>/dev/null | head -1)
+        if [ -z "$PG_CONFIG" ]; then
+            print_error "Could not locate pg_hba.conf file"
+            return 1
+        fi
+        print_status "Found config at: $PG_CONFIG"
+    fi
     
     # Backup original config
     cp $PG_CONFIG $PG_CONFIG.backup
