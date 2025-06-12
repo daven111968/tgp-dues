@@ -18,8 +18,7 @@ interface MemberModalProps {
 export default function MemberModal({ isOpen, onClose, member }: MemberModalProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [studentId, setStudentId] = useState("");
-  const [yearLevel, setYearLevel] = useState("");
+  const [batchNumber, setBatchNumber] = useState("");
   const [status, setStatus] = useState("active");
   
   const { toast } = useToast();
@@ -30,14 +29,12 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
     if (member) {
       setName(member.name);
       setEmail(member.email);
-      setStudentId(member.studentId);
-      setYearLevel(member.yearLevel);
+      setBatchNumber(member.batchNumber);
       setStatus(member.status);
     } else {
       setName("");
       setEmail("");
-      setStudentId("");
-      setYearLevel("");
+      setBatchNumber("");
       setStatus("active");
     }
   }, [member]);

@@ -9,7 +9,7 @@ export interface IStorage {
   // Member methods
   getMembers(): Promise<Member[]>;
   getMember(id: number): Promise<Member | undefined>;
-  getMemberByStudentId(studentId: string): Promise<Member | undefined>;
+  getMemberByBatchNumber(batchNumber: string): Promise<Member | undefined>;
   createMember(member: InsertMember): Promise<Member>;
   updateMember(id: number, member: Partial<InsertMember>): Promise<Member | undefined>;
   deleteMember(id: number): Promise<boolean>;
@@ -61,22 +61,19 @@ export class MemStorage implements IStorage {
       {
         name: "Juan Dela Cruz",
         email: "juan.delacruz@cbc.edu.ph",
-        studentId: "2021-00001",
-        yearLevel: "4th Year",
+        batchNumber: "Batch-2021",
         status: "active"
       },
       {
         name: "Mark Santos",
         email: "mark.santos@cbc.edu.ph",
-        studentId: "2021-00002", 
-        yearLevel: "3rd Year",
+        batchNumber: "Batch-2021", 
         status: "active"
       },
       {
         name: "Paolo Rodriguez",
         email: "paolo.rodriguez@cbc.edu.ph",
-        studentId: "2022-00001",
-        yearLevel: "2nd Year", 
+        batchNumber: "Batch-2022",
         status: "active"
       }
     ];
@@ -138,9 +135,9 @@ export class MemStorage implements IStorage {
     return this.members.get(id);
   }
 
-  async getMemberByStudentId(studentId: string): Promise<Member | undefined> {
+  async getMemberByBatchNumber(batchNumber: string): Promise<Member | undefined> {
     return Array.from(this.members.values()).find(
-      (member) => member.studentId === studentId
+      (member) => member.batchNumber === batchNumber
     );
   }
 
@@ -149,6 +146,7 @@ export class MemStorage implements IStorage {
     const member: Member = { 
       ...insertMember, 
       id,
+      status: insertMember.status || "active",
       joinedAt: new Date()
     };
     this.members.set(id, member);
@@ -183,6 +181,7 @@ export class MemStorage implements IStorage {
     const payment: Payment = { 
       ...insertPayment, 
       id,
+      notes: insertPayment.notes || null,
       createdAt: new Date()
     };
     this.payments.set(id, payment);

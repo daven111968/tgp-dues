@@ -55,10 +55,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const memberData = insertMemberSchema.parse(req.body);
       
-      // Check if student ID already exists
-      const existingMember = await storage.getMemberByStudentId(memberData.studentId);
+      // Check if batch number already exists
+      const existingMember = await storage.getMemberByBatchNumber(memberData.batchNumber);
       if (existingMember) {
-        return res.status(400).json({ message: "Student ID already exists" });
+        return res.status(400).json({ message: "Batch number already exists" });
       }
       
       const member = await storage.createMember(memberData);
