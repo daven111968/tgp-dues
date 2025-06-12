@@ -266,9 +266,9 @@ setup_application() {
     chown -R root:root $APP_DIR
     chmod -R 755 $APP_DIR
     
-    # Install dependencies
+    # Install dependencies (including dev dependencies for build tools)
     log_info "Installing application dependencies..."
-    npm ci --only=production
+    npm install
     
     log_success "Application files copied and dependencies installed"
 }
