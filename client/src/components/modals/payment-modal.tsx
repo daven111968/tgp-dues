@@ -37,10 +37,7 @@ export default function PaymentModal({ isOpen, onClose, selectedMemberId }: Paym
       paymentDate: string;
       notes?: string;
     }) => {
-      const response = await apiRequest('POST', '/api/payments', {
-        ...paymentData,
-        paymentDate: new Date(paymentData.paymentDate).toISOString(),
-      });
+      const response = await apiRequest('POST', '/api/payments', paymentData);
       return response.json();
     },
     onSuccess: () => {

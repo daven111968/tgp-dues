@@ -133,8 +133,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(payment);
     } catch (error) {
       if (error instanceof z.ZodError) {
+        console.log("Payment validation errors:", error.errors);
         return res.status(400).json({ message: "Invalid payment data", errors: error.errors });
       }
+      console.error("Payment creation error:", error);
       res.status(500).json({ message: "Failed to create payment" });
     }
   });

@@ -40,6 +40,8 @@ export const insertMemberSchema = createInsertSchema(members).omit({
 export const insertPaymentSchema = createInsertSchema(payments).omit({
   id: true,
   createdAt: true,
+}).extend({
+  paymentDate: z.coerce.date(),
 });
 
 export type User = typeof users.$inferSelect;
