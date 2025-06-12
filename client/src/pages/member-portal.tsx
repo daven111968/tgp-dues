@@ -27,6 +27,50 @@ export default function MemberPortal() {
       .sort((a, b) => new Date(b.paymentDate).getTime() - new Date(a.paymentDate).getTime()) 
     : [];
 
+  // Calculate monthly statistics for all members
+  const getMonthlyStats = () => {
+    const currentDate = new Date();
+    const monthlyStats = [];
+    
+    // Get stats for last 6 months
+    for (let i = 5; i >= 0; i--) {
+      const targetDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+      const month = targetDate.getMonth();
+      const year = targetDate.getFullYear();
+      
+      const monthlyPayments = payments.filter(payment => {
+        const paymentDate = new Date(payment.paymentDate);
+        return paymentDate.getMonth() === month && paymentDate.getFullYear() === year;
+      });
+      
+      // Group payments by member for this month
+      const memberPaymentTotals = new Map();
+      monthlyPayments.forEach(payment => {
+        const current = memberPaymentTotals.get(payment.memberId) || 0;
+        memberPaymentTotals.set(payment.memberId, current + parseFloat(payment.amount));
+      });
+      
+      // Count members who paid full amount (≥100)
+      const paidMembers = Array.from(memberPaymentTotals.values()).filter(total => total >= 100).length;
+      const partialMembers = Array.from(memberPaymentTotals.values()).filter(total => total > 0 && total < 100).length;
+      const totalAmount = monthlyPayments.reduce((sum, payment) => sum + parseFloat(payment.amount), 0);
+      
+      monthlyStats.push({
+        month: targetDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+        totalMembers: members.length,
+        paidMembers,
+        partialMembers,
+        pendingMembers: members.length - paidMembers - partialMembers,
+        totalAmount: totalAmount,
+        paymentRate: members.length > 0 ? ((paidMembers / members.length) * 100) : 0
+      });
+    }
+    
+    return monthlyStats;
+  };
+
+  const monthlyStats = getMonthlyStats();
+
   // Calculate payment status
   const getPaymentStatus = (member: Member) => {
     const now = new Date();
@@ -106,6 +150,66 @@ export default function MemberPortal() {
           <span>Sign Out</span>
         </Button>
       </div>
+
+      {/* Monthly Payment Statistics */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <FileText className="h-5 w-5" />
+            <span>Chapter Payment Statistics</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Month</TableHead>
+                  <TableHead className="text-center">Total Members</TableHead>
+                  <TableHead className="text-center">Paid in Full</TableHead>
+                  <TableHead className="text-center">Partial Payment</TableHead>
+                  <TableHead className="text-center">Pending</TableHead>
+                  <TableHead className="text-center">Payment Rate</TableHead>
+                  <TableHead className="text-right">Total Collected</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {monthlyStats.map((stat) => (
+                  <TableRow key={stat.month}>
+                    <TableCell className="font-medium">{stat.month}</TableCell>
+                    <TableCell className="text-center">{stat.totalMembers}</TableCell>
+                    <TableCell className="text-center">
+                      <Badge className="bg-green-100 text-green-800">{stat.paidMembers}</Badge>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {stat.partialMembers > 0 ? (
+                        <Badge className="bg-yellow-100 text-yellow-800">{stat.partialMembers}</Badge>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {stat.pendingMembers > 0 ? (
+                        <Badge className="bg-red-100 text-red-800">{stat.pendingMembers}</Badge>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <span className={`font-medium ${stat.paymentRate >= 80 ? 'text-green-600' : stat.paymentRate >= 60 ? 'text-yellow-600' : 'text-red-600'}`}>
+                        {stat.paymentRate.toFixed(1)}%
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right font-mono">
+                      ₱{stat.totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Member Information */}
         <div className="space-y-6">
