@@ -45,7 +45,6 @@ export default function Activities() {
     defaultValues: {
       name: "",
       description: "",
-      targetAmount: "",
       status: "active",
       startDate: new Date(),
       endDate: undefined,
@@ -173,12 +172,10 @@ export default function Activities() {
       yPos += 10;
       
       const totalRaised = activities.reduce((sum, a) => sum + parseFloat(a.currentAmount), 0);
-      const totalTarget = activities.reduce((sum, a) => sum + parseFloat(a.targetAmount), 0);
       const contributors = new Set(contributions.map(c => c.memberId)).size;
       
       const summaryData = [
         ['Total Activities', activities.length.toString()],
-        ['Total Target Amount', `₱${totalTarget.toLocaleString()}`],
         ['Total Raised', `₱${totalRaised.toLocaleString()}`],
         ['Total Contributors', contributors.toString()],
         ['Total Contributions', contributions.length.toString()]
@@ -337,9 +334,9 @@ export default function Activities() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Amount Due per Member</p>
+                <p className="text-sm font-medium text-gray-600">Total Activities</p>
                 <p className="text-3xl font-bold text-gray-900">
-                  ₱{members && members.length > 0 ? (activities.reduce((sum, a) => sum + parseFloat(a.targetAmount), 0) / members.length).toLocaleString() : '0'}
+                  {activities.length}
                 </p>
               </div>
               <Target className="h-8 w-8 text-green-500" />
@@ -404,13 +401,9 @@ export default function Activities() {
                     </Badge>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
-                      <p className="text-sm text-gray-600">Target Amount</p>
-                      <p className="font-semibold">₱{parseFloat(activity.targetAmount).toLocaleString()}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Raised Amount</p>
+                      <p className="text-sm text-gray-600">Total Raised</p>
                       <p className="font-semibold">₱{parseFloat(activity.currentAmount).toLocaleString()}</p>
                     </div>
                     <div>
@@ -421,17 +414,45 @@ export default function Activities() {
                     </div>
                   </div>
 
+                  {/* Contributors Table for this activity */}
                   <div className="mb-4">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm text-gray-600">Progress</span>
-                      <span className="text-sm font-medium">
-                        {getProgressPercentage(activity.currentAmount, activity.targetAmount).toFixed(1)}%
-                      </span>
-                    </div>
-                    <Progress 
-                      value={getProgressPercentage(activity.currentAmount, activity.targetAmount)} 
-                      className="h-2"
-                    />
+                    {(() => {
+                      const activityContributions = contributions.filter(c => c.activityId === activity.id);
+                      if (activityContributions.length === 0) {
+                        return (
+                          <div className="text-sm text-gray-500 text-center py-2">
+                            No contributions yet
+                          </div>
+                        );
+                      }
+                      return (
+                        <div>
+                          <p className="text-sm font-medium text-gray-700 mb-2">Contributors ({activityContributions.length})</p>
+                          <div className="border rounded-lg overflow-hidden">
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead className="py-2 text-xs">Member</TableHead>
+                                  <TableHead className="py-2 text-xs">Amount</TableHead>
+                                  <TableHead className="py-2 text-xs">Date</TableHead>
+                                  <TableHead className="py-2 text-xs">Notes</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {activityContributions.map((contrib) => (
+                                  <TableRow key={contrib.id}>
+                                    <TableCell className="py-2 text-sm">{contrib.memberName}</TableCell>
+                                    <TableCell className="py-2 text-sm">₱{parseFloat(contrib.amount).toLocaleString()}</TableCell>
+                                    <TableCell className="py-2 text-sm">{formatDate(contrib.contributionDate)}</TableCell>
+                                    <TableCell className="py-2 text-sm">{contrib.notes || '-'}</TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   <Button

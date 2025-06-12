@@ -43,7 +43,6 @@ export const activities = pgTable("activities", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description"),
-  targetAmount: decimal("target_amount", { precision: 10, scale: 2 }).notNull(),
   currentAmount: decimal("current_amount", { precision: 10, scale: 2 }).notNull().default("0.00"),
   status: text("status").notNull().default("active"), // active, completed, cancelled
   startDate: timestamp("start_date").notNull(),
