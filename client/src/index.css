@@ -2,6 +2,74 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Mobile-first responsive design enhancements */
+@layer base {
+  /* Improve touch targets for mobile */
+  button, 
+  [role="button"],
+  input,
+  select,
+  textarea {
+    min-height: 44px; /* Apple's recommended minimum touch target */
+  }
+
+  /* Better scrolling on mobile */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Prevent zoom on input focus for iOS */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  textarea,
+  select {
+    font-size: 16px;
+  }
+
+  /* Enhanced mobile table scrolling */
+  .mobile-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Better mobile card spacing */
+  .mobile-card-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .mobile-card-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .mobile-card-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  /* Touch-friendly form controls */
+  .touch-friendly {
+    padding: 12px 16px;
+    border-radius: 8px;
+  }
+
+  /* Improved mobile modals */
+  @media (max-width: 640px) {
+    .mobile-modal {
+      margin: 0;
+      max-height: 100vh;
+      border-radius: 0;
+    }
+  }
+}
+
 :root {
   --background: hsl(0, 0%, 100%);
   --foreground: hsl(20, 14.3%, 4.1%);

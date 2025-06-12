@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/lib/auth";
+import { OfflineIndicator } from "@/components/ui/offline-indicator";
 import Login from "@/pages/login";
 import Dashboard from "@/pages/dashboard";
 import Members from "@/pages/members";
@@ -28,6 +29,9 @@ function AuthenticatedApp() {
       <div className="flex-1 flex flex-col overflow-hidden">
         <MobileHeader />
         <div className="lg:hidden h-16"></div>
+        <div className="p-4 lg:p-0">
+          <OfflineIndicator />
+        </div>
         <Switch>
           <Route path="/" component={() => <Dashboard />} />
           <Route path="/dashboard" component={() => <Dashboard />} />
