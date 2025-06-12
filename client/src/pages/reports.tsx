@@ -122,6 +122,20 @@ export default function Reports() {
     });
   };
 
+  // State for selected month for member details
+  const [selectedMemberDetailsMonth, setSelectedMemberDetailsMonth] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  });
+
+  // Get member details for selected month
+  const getSelectedMonthDetails = () => {
+    const [year, month] = selectedMemberDetailsMonth.split('-').map(Number);
+    return getMemberPaymentDetails(month - 1, year);
+  };
+
+  const selectedMonthDetails = getSelectedMonthDetails();
+
   // Get current month details
   const currentDate = new Date();
   const currentMonthDetails = getMemberPaymentDetails(currentDate.getMonth(), currentDate.getFullYear());
@@ -600,32 +614,52 @@ export default function Reports() {
         </CardContent>
       </Card>
 
-      {/* Current Month Member Payment Details */}
+      {/* Member Payment Details by Month */}
       <Card className="mt-6">
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Users className="h-5 w-5" />
-            <span>Current Month Payment Details ({currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })})</span>
-          </CardTitle>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <CardTitle className="flex items-center space-x-2">
+              <Users className="h-5 w-5" />
+              <span>Member Payment Details</span>
+            </CardTitle>
+            <Select value={selectedMemberDetailsMonth} onValueChange={setSelectedMemberDetailsMonth}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Select Month" />
+              </SelectTrigger>
+              <SelectContent>
+                {Array.from({ length: 12 }, (_, i) => {
+                  const date = new Date();
+                  date.setMonth(i);
+                  const currentYear = new Date().getFullYear();
+                  const monthValue = `${currentYear}-${String(i + 1).padStart(2, '0')}`;
+                  return (
+                    <SelectItem key={monthValue} value={monthValue}>
+                      {date.toLocaleDateString('en-US', { month: 'long' })} {currentYear}
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div className="bg-green-50 p-4 rounded-lg">
               <p className="text-sm font-medium text-green-600">Paid in Full</p>
               <p className="text-2xl font-bold text-green-900">
-                {currentMonthDetails.filter(member => member.status === 'paid').length}
+                {selectedMonthDetails.filter(member => member.status === 'paid').length}
               </p>
             </div>
             <div className="bg-yellow-50 p-4 rounded-lg">
               <p className="text-sm font-medium text-yellow-600">Partial Payment</p>
               <p className="text-2xl font-bold text-yellow-900">
-                {currentMonthDetails.filter(member => member.status === 'partial').length}
+                {selectedMonthDetails.filter(member => member.status === 'partial').length}
               </p>
             </div>
             <div className="bg-red-50 p-4 rounded-lg">
               <p className="text-sm font-medium text-red-600">Pending</p>
               <p className="text-2xl font-bold text-red-900">
-                {currentMonthDetails.filter(member => member.status === 'pending').length}
+                {selectedMonthDetails.filter(member => member.status === 'pending').length}
               </p>
             </div>
           </div>
@@ -641,7 +675,7 @@ export default function Reports() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {currentMonthDetails
+                {selectedMonthDetails
                   .sort((a, b) => {
                     // Sort by status: paid first, then partial, then pending
                     const statusOrder = { paid: 0, partial: 1, pending: 2 } as const;

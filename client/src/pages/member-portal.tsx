@@ -1,8 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar, CreditCard, User, MapPin, Clock, FileText, LogOut, Activity, Users } from "lucide-react";
 import { Member, Payment, Contribution, Activity as ActivityType } from "@shared/schema";
 import { useAuth } from "@/lib/auth";
@@ -85,15 +87,19 @@ export default function MemberPortal() {
 
   const monthlyStats = getMonthlyStats();
 
-  // Get detailed member payment status for current month
-  const getCurrentMonthMemberDetails = () => {
-    const currentDate = new Date();
-    const month = currentDate.getMonth();
-    const year = currentDate.getFullYear();
+  // State for selected month
+  const [selectedMemberMonth, setSelectedMemberMonth] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  });
+
+  // Get detailed member payment status for a specific month
+  const getMemberPaymentDetailsForMonth = (monthYear: string) => {
+    const [year, month] = monthYear.split('-').map(Number);
     
     const monthlyPayments = payments.filter(payment => {
       const paymentDate = new Date(payment.paymentDate);
-      return paymentDate.getMonth() === month && paymentDate.getFullYear() === year;
+      return paymentDate.getMonth() === month - 1 && paymentDate.getFullYear() === year;
     });
 
     // Group payments by member
@@ -119,7 +125,7 @@ export default function MemberPortal() {
     });
   };
 
-  const currentMonthMemberDetails = getCurrentMonthMemberDetails();
+  const selectedMonthMemberDetails = getMemberPaymentDetailsForMonth(selectedMemberMonth);
 
   // Calculate payment status
   const getPaymentStatus = (member: Member) => {
@@ -499,32 +505,52 @@ export default function MemberPortal() {
             </CardContent>
           </Card>
 
-          {/* Current Month Member Payment Status */}
+          {/* Chapter Member Payment Status by Month */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Users className="h-5 w-5" />
-                <span>Chapter Payment Status - {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
-              </CardTitle>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <CardTitle className="flex items-center space-x-2">
+                  <Users className="h-5 w-5" />
+                  <span>Chapter Payment Status</span>
+                </CardTitle>
+                <Select value={selectedMemberMonth} onValueChange={setSelectedMemberMonth}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Select Month" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 12 }, (_, i) => {
+                      const date = new Date();
+                      date.setMonth(i);
+                      const currentYear = new Date().getFullYear();
+                      const monthValue = `${currentYear}-${String(i + 1).padStart(2, '0')}`;
+                      return (
+                        <SelectItem key={monthValue} value={monthValue}>
+                          {date.toLocaleDateString('en-US', { month: 'long' })} {currentYear}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div className="bg-green-50 p-4 rounded-lg">
                   <p className="text-sm font-medium text-green-600">Paid in Full</p>
                   <p className="text-2xl font-bold text-green-900">
-                    {currentMonthMemberDetails.filter(member => member.status === 'paid').length}
+                    {selectedMonthMemberDetails.filter(member => member.status === 'paid').length}
                   </p>
                 </div>
                 <div className="bg-yellow-50 p-4 rounded-lg">
                   <p className="text-sm font-medium text-yellow-600">Partial Payment</p>
                   <p className="text-2xl font-bold text-yellow-900">
-                    {currentMonthMemberDetails.filter(member => member.status === 'partial').length}
+                    {selectedMonthMemberDetails.filter(member => member.status === 'partial').length}
                   </p>
                 </div>
                 <div className="bg-red-50 p-4 rounded-lg">
                   <p className="text-sm font-medium text-red-600">Pending</p>
                   <p className="text-2xl font-bold text-red-900">
-                    {currentMonthMemberDetails.filter(member => member.status === 'pending').length}
+                    {selectedMonthMemberDetails.filter(member => member.status === 'pending').length}
                   </p>
                 </div>
               </div>
