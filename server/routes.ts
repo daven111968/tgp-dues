@@ -23,7 +23,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(401).json({ message: "Invalid credentials" });
         }
         
-        res.json({ 
+        return res.json({ 
           user: { 
             id: user.id, 
             username: user.username, 
@@ -32,14 +32,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
             accountType: 'admin'
           } 
         });
-      } else if (accountType === 'member') {
+      }
+      
+      if (accountType === 'member') {
         const member = await storage.getMemberByUsername(username);
         
         if (!member || !member.password || member.password !== password) {
           return res.status(401).json({ message: "Invalid credentials" });
         }
         
-        res.json({ 
+        return res.json({ 
           user: { 
             id: member.id, 
             username: member.username || username, 
@@ -47,9 +49,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             accountType: 'member'
           } 
         });
-      } else {
-        return res.status(400).json({ message: "Invalid account type" });
       }
+      
+      return res.status(400).json({ message: "Invalid account type" });
     } catch (error) {
       console.error('Login error:', error);
       res.status(400).json({ message: "Invalid request" });
