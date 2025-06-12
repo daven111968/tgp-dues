@@ -244,28 +244,29 @@ export default function MemberPortal() {
               <SelectContent>
                 <SelectItem value="all">All Months</SelectItem>
                 {(() => {
-                  // Get available years from payment data
-                  const paymentYears = payments.map(payment => new Date(payment.paymentDate).getFullYear());
-                  const yearSet = new Set(paymentYears);
-                  const uniqueYears: number[] = [];
-                  yearSet.forEach(year => uniqueYears.push(year));
-                  uniqueYears.sort((a, b) => b - a);
+                  // Get available year-month combinations from actual payment data
+                  const paymentMonths = new Set<string>();
+                  payments.forEach(payment => {
+                    const paymentDate = new Date(payment.paymentDate);
+                    const year = paymentDate.getFullYear();
+                    const month = paymentDate.getMonth() + 1;
+                    paymentMonths.add(`${year}-${String(month).padStart(2, '0')}`);
+                  });
                   
-                  const currentYear = new Date().getFullYear();
-                  const availableYears = uniqueYears.length > 0 ? uniqueYears : [currentYear];
+                  // Convert to array and sort (newest first)
+                  const monthsArray: string[] = [];
+                  paymentMonths.forEach(month => monthsArray.push(month));
+                  monthsArray.sort((a, b) => b.localeCompare(a));
                   
-                  return availableYears.flatMap(year => 
-                    Array.from({ length: 12 }, (_, i) => {
-                      const date = new Date();
-                      date.setMonth(i);
-                      const monthValue = `${year}-${String(i + 1).padStart(2, '0')}`;
-                      return (
-                        <SelectItem key={monthValue} value={monthValue}>
-                          {date.toLocaleDateString('en-US', { month: 'long' })} {year}
-                        </SelectItem>
-                      );
-                    })
-                  );
+                  return monthsArray.map(monthValue => {
+                    const [year, month] = monthValue.split('-').map(Number);
+                    const date = new Date(year, month - 1);
+                    return (
+                      <SelectItem key={monthValue} value={monthValue}>
+                        {date.toLocaleDateString('en-US', { month: 'long' })} {year}
+                      </SelectItem>
+                    );
+                  });
                 })()}
               </SelectContent>
             </Select>
@@ -567,28 +568,28 @@ export default function MemberPortal() {
                   </SelectTrigger>
                   <SelectContent>
                     {(() => {
-                      // Get available years from payment data
-                      const paymentYears = payments.map(payment => new Date(payment.paymentDate).getFullYear());
-                      const yearSet = new Set(paymentYears);
-                      const uniqueYears: number[] = [];
-                      yearSet.forEach(year => uniqueYears.push(year));
-                      uniqueYears.sort((a, b) => b - a);
+                      // Get available year-month combinations from actual payment data
+                      const paymentMonths = new Set<string>();
+                      payments.forEach(payment => {
+                        const paymentDate = new Date(payment.paymentDate);
+                        const year = paymentDate.getFullYear();
+                        const month = paymentDate.getMonth() + 1;
+                        paymentMonths.add(`${year}-${String(month).padStart(2, '0')}`);
+                      });
                       
-                      const currentYear = new Date().getFullYear();
-                      const availableYears = uniqueYears.length > 0 ? uniqueYears : [currentYear];
+                      // Convert to array and sort (newest first)  
+                      const monthsArray: string[] = [...paymentMonths];
+                      monthsArray.sort((a, b) => b.localeCompare(a));
                       
-                      return availableYears.flatMap(year => 
-                        Array.from({ length: 12 }, (_, i) => {
-                          const date = new Date();
-                          date.setMonth(i);
-                          const monthValue = `${year}-${String(i + 1).padStart(2, '0')}`;
-                          return (
-                            <SelectItem key={monthValue} value={monthValue}>
-                              {date.toLocaleDateString('en-US', { month: 'long' })} {year}
-                            </SelectItem>
-                          );
-                        })
-                      );
+                      return monthsArray.map(monthValue => {
+                        const [year, month] = monthValue.split('-').map(Number);
+                        const date = new Date(year, month - 1);
+                        return (
+                          <SelectItem key={monthValue} value={monthValue}>
+                            {date.toLocaleDateString('en-US', { month: 'long' })} {year}
+                          </SelectItem>
+                        );
+                      });
                     })()}
                   </SelectContent>
                 </Select>
