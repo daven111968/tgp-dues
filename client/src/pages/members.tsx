@@ -258,11 +258,11 @@ export default function Members() {
                             <div>
                               <div className="text-sm font-medium text-gray-900">
                                 {member.name}
-                                {member.aliasName && (
-                                  <span className="text-gray-500 font-normal"> ({member.aliasName})</span>
+                                {member.alexisName && (
+                                  <span className="text-gray-500 font-normal"> ({member.alexisName})</span>
                                 )}
                               </div>
-                              <div className="text-sm text-gray-500">{member.email}</div>
+                              <div className="text-sm text-gray-500">{member.address}</div>
                             </div>
                           </div>
                         </TableCell>
@@ -351,8 +351,8 @@ export default function Members() {
                     <div>
                       <h3 className="text-xl font-bold">
                         {viewingMember.name}
-                        {viewingMember.aliasName && (
-                          <span className="text-gray-500 font-normal text-lg"> ({viewingMember.aliasName})</span>
+                        {viewingMember.alexisName && (
+                          <span className="text-gray-500 font-normal text-lg"> ({viewingMember.alexisName})</span>
                         )}
                       </h3>
                       <p className="text-gray-600">

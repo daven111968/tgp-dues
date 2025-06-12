@@ -74,19 +74,19 @@ export class DatabaseStorage implements IStorage {
       const sampleMembers = [
         {
           name: "Juan Dela Cruz",
-          email: "juan.delacruz@cbc.edu.ph",
+          address: "123 Main St, Quezon City",
           batchNumber: "Batch-2021",
           status: "active"
         },
         {
           name: "Mark Santos",
-          email: "mark.santos@cbc.edu.ph",
+          address: "456 Rizal Ave, Manila",
           batchNumber: "Batch-2021", 
           status: "active"
         },
         {
           name: "Paolo Rodriguez",
-          email: "paolo.rodriguez@cbc.edu.ph",
+          address: "789 EDSA, Makati City",
           batchNumber: "Batch-2022",
           status: "active"
         }

@@ -48,8 +48,8 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
   const createMemberMutation = useMutation({
     mutationFn: async (memberData: {
       name: string;
-      aliasName?: string;
-      email: string;
+      alexisName?: string;
+      address: string;
       batchNumber: string;
       batchName?: string;
       status: string;
@@ -78,8 +78,8 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
   const updateMemberMutation = useMutation({
     mutationFn: async (memberData: {
       name: string;
-      aliasName?: string;
-      email: string;
+      alexisName?: string;
+      address: string;
       batchNumber: string;
       batchName?: string;
       status: string;
@@ -134,8 +134,8 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
 
   const handleClose = () => {
     setName("");
-    setAliasName("");
-    setEmail("");
+    setAlexisName("");
+    setAddress("");
     setBatchNumber("");
     setBatchName("");
     setStatus("active");
@@ -164,23 +164,22 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
           </div>
           
           <div>
-            <Label htmlFor="aliasName">Alias Name</Label>
+            <Label htmlFor="alexisName">Alexis Name</Label>
             <Input
-              id="aliasName"
-              value={aliasName}
-              onChange={(e) => setAliasName(e.target.value)}
-              placeholder="Enter alias/nickname (optional)"
+              id="alexisName"
+              value={alexisName}
+              onChange={(e) => setAlexisName(e.target.value)}
+              placeholder="Enter alexis name (optional)"
             />
           </div>
           
           <div>
-            <Label htmlFor="email">Email *</Label>
+            <Label htmlFor="address">Address *</Label>
             <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="member@cbc.edu.ph"
+              id="address"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="Enter full address"
               required
             />
           </div>
