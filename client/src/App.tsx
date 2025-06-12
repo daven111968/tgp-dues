@@ -22,9 +22,6 @@ import NotFound from "@/pages/not-found";
 function AuthenticatedApp() {
   const { user } = useAuth();
 
-  // Debug: Log authentication state
-  console.log('AuthenticatedApp - user state:', user);
-
   if (!user) {
     return (
       <Switch>

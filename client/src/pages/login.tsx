@@ -11,21 +11,15 @@ export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const { login, isLoading, user } = useAuth();
-
-  // Debug: Log user state changes
-  console.log('Login page - current user:', user);
+  const { login, isLoading } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     
     try {
-      console.log('Attempting login with:', { username, accountType: 'admin' });
       await login(username, password);
-      console.log('Login completed successfully');
     } catch (err: any) {
-      console.error('Login failed:', err);
       setError(err.message || "Invalid credentials");
     }
   };
@@ -54,12 +48,10 @@ export default function Login() {
               <Label htmlFor="username">Officer ID</Label>
               <Input
                 id="username"
-                name="username"
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Enter your officer ID"
-                autoComplete="username"
                 required
               />
             </div>
@@ -68,12 +60,10 @@ export default function Login() {
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
-                name="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
-                autoComplete="current-password"
                 required
               />
             </div>

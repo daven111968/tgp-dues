@@ -28,27 +28,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return response.json();
     },
     onSuccess: (data) => {
-      console.log('Login successful, setting user:', data.user);
       setUser(data.user);
       localStorage.setItem('user', JSON.stringify(data.user));
-    },
-    onError: (error) => {
-      console.error('Login error:', error);
-      setUser(null);
-      localStorage.removeItem('user');
     },
   });
 
   const login = async (username: string, password: string, accountType: 'admin' | 'member' = 'admin') => {
-    try {
-      console.log('Auth: Starting login mutation...');
-      const result = await loginMutation.mutateAsync({ username, password, accountType });
-      console.log('Auth: Login mutation completed, result:', result);
-      return result;
-    } catch (error) {
-      console.error('Auth: Login mutation failed:', error);
-      throw error;
-    }
+    await loginMutation.mutateAsync({ username, password, accountType });
   };
 
   const logout = () => {
@@ -58,16 +44,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
-    console.log('Auth: Loading saved user from localStorage:', savedUser);
     if (savedUser) {
-      try {
-        const parsedUser = JSON.parse(savedUser);
-        console.log('Auth: Setting user from localStorage:', parsedUser);
-        setUser(parsedUser);
-      } catch (error) {
-        console.error('Auth: Failed to parse saved user:', error);
-        localStorage.removeItem('user');
-      }
+      setUser(JSON.parse(savedUser));
     }
   }, []);
 
