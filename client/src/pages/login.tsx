@@ -32,8 +32,8 @@ export default function Login() {
             <div className="w-16 h-16 bg-primary rounded-lg flex items-center justify-center mx-auto mb-4">
               <Users className="h-8 w-8 text-white" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Chapter Officer Login</h2>
-            <p className="text-gray-600">Access Tau Gamma Phi Rahugan CBC Chapter Management</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Chapter MKC Login</h2>
+            <p className="text-gray-600">Access Tau Gamma Phi Rahugan CBC Finance and Member Management</p>
           </div>
           
           {error && (

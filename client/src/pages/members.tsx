@@ -98,8 +98,18 @@ export default function Members() {
     
     if (!statusFilter || statusFilter === "all") return true;
     
-    const paymentStatus = getMemberPaymentStatus(member.id);
-    return paymentStatus.status === statusFilter;
+    // Check if filtering by member status
+    if (['active', 'inactive', 'suspended', 'expelled'].includes(statusFilter)) {
+      return member.status === statusFilter;
+    }
+    
+    // Check if filtering by payment status
+    if (['paid', 'pending', 'overdue'].includes(statusFilter)) {
+      const paymentStatus = getMemberPaymentStatus(member.id);
+      return paymentStatus.status === statusFilter;
+    }
+    
+    return true;
   });
 
   const handleEditMember = (member: Member) => {
@@ -225,13 +235,17 @@ export default function Members() {
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="All Status" />
+                <SelectValue placeholder="Filter by Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="paid">Paid</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="overdue">Overdue</SelectItem>
+                <SelectItem value="all">All Members</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="inactive">Inactive</SelectItem>
+                <SelectItem value="suspended">Suspended</SelectItem>
+                <SelectItem value="expelled">Expelled</SelectItem>
+                <SelectItem value="paid">Payment: Paid</SelectItem>
+                <SelectItem value="pending">Payment: Pending</SelectItem>
+                <SelectItem value="overdue">Payment: Overdue</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -256,7 +270,7 @@ export default function Members() {
               <TableBody>
                 {filteredMembers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                    <TableCell colSpan={6} className="text-center py-8 text-gray-500">
                       No members found
                     </TableCell>
                   </TableRow>
@@ -427,7 +441,7 @@ export default function Members() {
                       <div>
                         <p className="text-sm font-medium text-gray-500">Member Type</p>
                         <Badge variant="secondary" className="mt-1">
-                          {viewingMember.status === 'active' ? 'Active Member' : 'Inactive Member'}
+                          {viewingMember.memberType === 'pure_blooded' ? 'Pure Blooded' : 'Welcome'}
                         </Badge>
                       </div>
                     </div>
