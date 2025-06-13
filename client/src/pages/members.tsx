@@ -299,7 +299,11 @@ export default function Members() {
                         <TableCell className="text-sm text-gray-900">
                           {member.batchNumber || "—"}
                           {member.batchName && (
-                            <div className="text-xs text-gray-500">{member.batchName}</div>
+                            <div className="text-xs text-gray-500">
+                              {Array.isArray(member.batchName) 
+                                ? member.batchName.join(", ") 
+                                : member.batchName}
+                            </div>
                           )}
                         </TableCell>
                         <TableCell>
@@ -390,7 +394,9 @@ export default function Members() {
                       </h3>
                       <p className="text-gray-600">
                         {viewingMember.batchNumber}
-                        {viewingMember.batchName && ` - ${viewingMember.batchName}`}
+                        {viewingMember.batchName && ` - ${Array.isArray(viewingMember.batchName) 
+                          ? viewingMember.batchName.join(", ") 
+                          : viewingMember.batchName}`}
                       </p>
                     </div>
                   </CardTitle>

@@ -93,7 +93,7 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
       alexisName?: string;
       address: string;
       batchNumber?: string;
-      batchName?: string;
+      batchName?: string[];
       initiationDate: string;
       memberType: string;
       welcomingDate?: string;
@@ -240,13 +240,41 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
               </div>
               
               <div>
-                <Label htmlFor="batchName">Batch Name</Label>
-                <Input
-                  id="batchName"
-                  value={batchName}
-                  onChange={(e) => setBatchName(e.target.value)}
-                  placeholder="Enter batch name (optional)"
-                />
+                <Label>Batch Names</Label>
+                <div className="space-y-2">
+                  {batchNames.map((name, index) => (
+                    <div key={index} className="flex space-x-2">
+                      <Input
+                        value={name}
+                        onChange={(e) => {
+                          const newNames = [...batchNames];
+                          newNames[index] = e.target.value;
+                          setBatchNames(newNames);
+                        }}
+                        placeholder="Enter batch name"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const newNames = batchNames.filter((_, i) => i !== index);
+                          setBatchNames(newNames);
+                        }}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setBatchNames([...batchNames, ""])}
+                  >
+                    Add Batch Name
+                  </Button>
+                </div>
               </div>
             </>
           )}
