@@ -231,30 +231,42 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
               <div>
                 <Label>Batch Numbers *</Label>
                 <div className="space-y-2">
-                  {batchNumbers.map((number, index) => (
-                    <div key={index} className="flex space-x-2">
+                  {batchNumbers.length === 0 ? (
+                    <div className="flex space-x-2">
                       <Input
-                        value={number}
-                        onChange={(e) => {
-                          const newNumbers = [...batchNumbers];
-                          newNumbers[index] = e.target.value;
-                          setBatchNumbers(newNumbers);
-                        }}
+                        value=""
+                        onChange={(e) => setBatchNumbers([e.target.value])}
                         placeholder={`Batch-${new Date().getFullYear()}`}
                       />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          const newNumbers = batchNumbers.filter((_, i) => i !== index);
-                          setBatchNumbers(newNumbers);
-                        }}
-                      >
-                        Remove
-                      </Button>
                     </div>
-                  ))}
+                  ) : (
+                    batchNumbers.map((number, index) => (
+                      <div key={index} className="flex space-x-2">
+                        <Input
+                          value={number}
+                          onChange={(e) => {
+                            const newNumbers = [...batchNumbers];
+                            newNumbers[index] = e.target.value;
+                            setBatchNumbers(newNumbers);
+                          }}
+                          placeholder={`Batch-${new Date().getFullYear()}`}
+                        />
+                        {batchNumbers.length > 1 && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const newNumbers = batchNumbers.filter((_, i) => i !== index);
+                              setBatchNumbers(newNumbers);
+                            }}
+                          >
+                            Remove
+                          </Button>
+                        )}
+                      </div>
+                    ))
+                  )}
                   <Button
                     type="button"
                     variant="outline"
@@ -263,39 +275,42 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
                   >
                     Add Batch Number
                   </Button>
-                  {batchNumbers.length === 0 && (
-                    <p className="text-sm text-red-500">At least one batch number is required for pure blooded members</p>
-                  )}
                 </div>
               </div>
               
               <div>
-                <Label>Batch Names</Label>
+                <Label>Batch Names (Optional)</Label>
                 <div className="space-y-2">
-                  {batchNames.map((name, index) => (
-                    <div key={index} className="flex space-x-2">
-                      <Input
-                        value={name}
-                        onChange={(e) => {
-                          const newNames = [...batchNames];
-                          newNames[index] = e.target.value;
-                          setBatchNames(newNames);
-                        }}
-                        placeholder="Enter batch name"
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          const newNames = batchNames.filter((_, i) => i !== index);
-                          setBatchNames(newNames);
-                        }}
-                      >
-                        Remove
-                      </Button>
+                  {batchNames.length === 0 ? (
+                    <div className="text-sm text-gray-500">
+                      No batch names added yet.
                     </div>
-                  ))}
+                  ) : (
+                    batchNames.map((name, index) => (
+                      <div key={index} className="flex space-x-2">
+                        <Input
+                          value={name}
+                          onChange={(e) => {
+                            const newNames = [...batchNames];
+                            newNames[index] = e.target.value;
+                            setBatchNames(newNames);
+                          }}
+                          placeholder="Enter batch name"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const newNames = batchNames.filter((_, i) => i !== index);
+                            setBatchNames(newNames);
+                          }}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    ))
+                  )}
                   <Button
                     type="button"
                     variant="outline"
