@@ -231,7 +231,9 @@ export default function Reports() {
       memberData[member.id] = {
         memberId: member.id,
         name: member.name,
-        batchNumber: member.batchNumber || 'N/A',
+        batchNumber: (member.batchNumber && member.batchNumber.length > 0 
+          ? member.batchNumber.join(", ")
+          : 'N/A') as string,
         totalAmount: 0,
         paymentCount: 0,
         lastPayment: null

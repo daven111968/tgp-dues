@@ -92,7 +92,8 @@ export default function Members() {
   const filteredMembers = members.filter(member => {
     const matchesSearch = member.name.toLowerCase().includes(search.toLowerCase()) ||
                          member.address.toLowerCase().includes(search.toLowerCase()) ||
-                         (member.batchNumber && member.batchNumber.toLowerCase().includes(search.toLowerCase()));
+                         (member.batchNumber && member.batchNumber.length > 0 && 
+                          member.batchNumber.some(num => num && num.toLowerCase().includes(search.toLowerCase())));
     
     if (!matchesSearch) return false;
     
@@ -397,7 +398,11 @@ export default function Members() {
                         )}
                       </h3>
                       <p className="text-gray-600">
-                        {viewingMember.batchNumber}
+                        {viewingMember.batchNumber && viewingMember.batchNumber.length > 0 
+                          ? (Array.isArray(viewingMember.batchNumber) 
+                              ? viewingMember.batchNumber.join(", ") 
+                              : viewingMember.batchNumber)
+                          : "No batch numbers"}
                         {viewingMember.batchName && ` - ${Array.isArray(viewingMember.batchName) 
                           ? viewingMember.batchName.join(", ") 
                           : viewingMember.batchName}`}
