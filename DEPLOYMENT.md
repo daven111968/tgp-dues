@@ -2,27 +2,24 @@
 
 ## Tau Gamma Phi CBC Chapter Management System
 
-This guide provides step-by-step instructions for deploying the chapter management system on an Ubuntu VPS.
+## Quick Deployment (Recommended)
 
-## Prerequisites
-
-- Ubuntu 20.04 or 22.04 LTS VPS
-- Root or sudo access
-- Domain name (optional but recommended)
-- Minimum 1GB RAM, 1 CPU core, 20GB storage
-
-## Quick Deployment
-
-### 1. Run the automated deployment script
+Use the automated quick deploy script for complete setup:
 
 ```bash
-# Download and run the deployment script
-curl -fsSL https://raw.githubusercontent.com/your-repo/deploy-ubuntu.sh | bash
-
-# Or if you have the files locally:
-chmod +x deploy-ubuntu.sh
-./deploy-ubuntu.sh
+# Download and run the quick deployment script
+wget https://raw.githubusercontent.com/your-repo/quick-deploy.sh
+chmod +x quick-deploy.sh
+sudo ./quick-deploy.sh
 ```
+
+This script will:
+- Install all required software (Node.js, PostgreSQL, Nginx)
+- Setup database and security
+- Configure web server and firewall
+- Create management scripts
+
+For detailed step-by-step instructions, see **QUICK-DEPLOY-TUTORIAL.md**
 
 ### 2. Upload your application files
 
