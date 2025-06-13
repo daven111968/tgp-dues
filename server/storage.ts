@@ -76,7 +76,7 @@ export class DatabaseStorage implements IStorage {
         {
           name: "Juan Dela Cruz",
           address: "123 Main St, Quezon City",
-          batchNumber: ["Batch-2021"],
+          batchNumber: "Batch-2021",
           initiationDate: new Date('2021-03-15'),
           memberType: "pure_blooded",
           status: "active",
@@ -86,7 +86,7 @@ export class DatabaseStorage implements IStorage {
         {
           name: "Mark Santos",
           address: "456 Rizal Ave, Manila",
-          batchNumber: ["Batch-2021"], 
+          batchNumber: "Batch-2021", 
           initiationDate: new Date('2021-04-20'),
           memberType: "pure_blooded",
           status: "active",
@@ -106,8 +106,8 @@ export class DatabaseStorage implements IStorage {
       ];
 
       const createdMembers = [];
-      for (const memberData of sampleMembers) {
-        const created = await this.createMember(memberData as any);
+      for (const member of sampleMembers) {
+        const created = await this.createMember(member);
         createdMembers.push(created);
       }
 
