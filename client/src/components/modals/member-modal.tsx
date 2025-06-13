@@ -45,7 +45,7 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
       setName("");
       setAlexisName("");
       setAddress("");
-      setBatchNumbers([]);
+      setBatchNumbers([""]);
       setBatchNames([]);
       setInitiationDate("");
       setMemberType("pure_blooded");
