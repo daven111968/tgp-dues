@@ -192,11 +192,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createMember(insertMember: InsertMember): Promise<Member> {
-    const [member] = await db
-      .insert(members)
-      .values(insertMember)
-      .returning();
-    return member;
+    try {
+      console.log("Creating member with data:", JSON.stringify(insertMember, null, 2));
+      const [member] = await db
+        .insert(members)
+        .values(insertMember)
+        .returning();
+      console.log("Member created successfully:", JSON.stringify(member, null, 2));
+      return member;
+    } catch (error) {
+      console.error("Database error in createMember:", error);
+      throw error;
+    }
   }
 
   async updateMember(id: number, memberUpdate: Partial<InsertMember>): Promise<Member | undefined> {
