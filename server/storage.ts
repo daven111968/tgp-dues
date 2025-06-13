@@ -72,11 +72,11 @@ export class DatabaseStorage implements IStorage {
       });
 
       // Create sample members
-      const sampleMembers = [
+      const sampleMembers: InsertMember[] = [
         {
           name: "Juan Dela Cruz",
           address: "123 Main St, Quezon City",
-          batchNumber: "Batch-2021",
+          batchNumber: ["Batch-2021"],
           initiationDate: new Date('2021-03-15'),
           memberType: "pure_blooded",
           status: "active",
@@ -86,7 +86,7 @@ export class DatabaseStorage implements IStorage {
         {
           name: "Mark Santos",
           address: "456 Rizal Ave, Manila",
-          batchNumber: "Batch-2021", 
+          batchNumber: ["Batch-2021"], 
           initiationDate: new Date('2021-04-20'),
           memberType: "pure_blooded",
           status: "active",
@@ -192,18 +192,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createMember(insertMember: InsertMember): Promise<Member> {
-    try {
-      console.log("Creating member with data:", JSON.stringify(insertMember, null, 2));
-      const [member] = await db
-        .insert(members)
-        .values(insertMember)
-        .returning();
-      console.log("Member created successfully:", JSON.stringify(member, null, 2));
-      return member;
-    } catch (error) {
-      console.error("Database error in createMember:", error);
-      throw error;
-    }
+    const [member] = await db
+      .insert(members)
+      .values(insertMember)
+      .returning();
+    return member;
   }
 
   async updateMember(id: number, memberUpdate: Partial<InsertMember>): Promise<Member | undefined> {

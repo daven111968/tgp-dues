@@ -149,8 +149,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/members", async (req, res) => {
     try {
-      console.log("Request body:", JSON.stringify(req.body, null, 2));
-      
       // Convert date strings to Date objects
       const requestBody = {
         ...req.body,
@@ -158,11 +156,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         welcomingDate: req.body.welcomingDate ? new Date(req.body.welcomingDate) : undefined
       };
       
-      console.log("Processed request body:", JSON.stringify(requestBody, null, 2));
-      
       const memberData = insertMemberSchema.parse(requestBody);
-      console.log("Validated member data:", JSON.stringify(memberData, null, 2));
-      
       const newMember = await storage.createMember(memberData);
       res.status(201).json(newMember);
     } catch (error) {
@@ -170,7 +164,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid member data", errors: error.errors });
       }
-      res.status(500).json({ message: "Failed to create member", error: error.message });
+      res.status(500).json({ message: "Failed to create member" });
     }
   });
 
