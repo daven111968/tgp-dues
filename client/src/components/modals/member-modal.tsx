@@ -20,7 +20,7 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
   const [alexisName, setAlexisName] = useState("");
   const [address, setAddress] = useState("");
   const [batchNumber, setBatchNumber] = useState("");
-  const [batchName, setBatchName] = useState("");
+  const [batchNames, setBatchNames] = useState<string[]>([]);
   const [initiationDate, setInitiationDate] = useState("");
   const [memberType, setMemberType] = useState("pure_blooded");
   const [welcomingDate, setWelcomingDate] = useState("");
@@ -36,7 +36,7 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
       setAlexisName(member.alexisName || "");
       setAddress(member.address);
       setBatchNumber(member.batchNumber || "");
-      setBatchName(member.batchName || "");
+      setBatchNames(Array.isArray(member.batchName) ? member.batchName : member.batchName ? [member.batchName] : []);
       setInitiationDate(member.initiationDate ? new Date(member.initiationDate).toISOString().split('T')[0] : "");
       setMemberType(member.memberType || "pure_blooded");
       setWelcomingDate(member.welcomingDate ? new Date(member.welcomingDate).toISOString().split('T')[0] : "");
@@ -46,7 +46,7 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
       setAlexisName("");
       setAddress("");
       setBatchNumber("");
-      setBatchName("");
+      setBatchNames([]);
       setInitiationDate("");
       setMemberType("pure_blooded");
       setWelcomingDate("");
@@ -60,7 +60,7 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
       alexisName?: string;
       address: string;
       batchNumber?: string;
-      batchName?: string;
+      batchName?: string[];
       initiationDate: string;
       memberType: string;
       welcomingDate?: string;
@@ -157,7 +157,7 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
       alexisName: alexisName.trim() || undefined,
       address: address.trim(),
       batchNumber: memberType === "pure_blooded" ? batchNumber.trim() : undefined,
-      batchName: batchName.trim() || undefined,
+      batchName: batchNames.length > 0 ? batchNames.filter(name => name.trim()) : undefined,
       initiationDate: initiationDate,
       memberType: memberType,
       welcomingDate: memberType === "welcome" ? welcomingDate : undefined,
@@ -176,7 +176,7 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
     setAlexisName("");
     setAddress("");
     setBatchNumber("");
-    setBatchName("");
+    setBatchNames([]);
     setInitiationDate("");
     setMemberType("pure_blooded");
     setWelcomingDate("");
