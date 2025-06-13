@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Download, Calendar, TrendingUp, Users, DollarSign } from "lucide-react";
+import { Download, Calendar, TrendingUp, Users, Coins } from "lucide-react";
 import type { Payment, Member } from "@shared/schema";
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -483,7 +483,7 @@ export default function Reports() {
                 <p className="text-3xl font-bold text-green-600">₱{monthlyReport.totalAmount.toLocaleString()}</p>
               </div>
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <DollarSign className="text-green-600 text-xl" />
+                <Coins className="text-green-600 text-xl" />
               </div>
             </div>
           </CardContent>
