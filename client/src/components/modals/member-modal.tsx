@@ -19,7 +19,7 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
   const [name, setName] = useState("");
   const [alexisName, setAlexisName] = useState("");
   const [address, setAddress] = useState("");
-  const [batchNumber, setBatchNumber] = useState("");
+  const [batchNumbers, setBatchNumbers] = useState<string[]>([]);
   const [batchNames, setBatchNames] = useState<string[]>([]);
   const [initiationDate, setInitiationDate] = useState("");
   const [memberType, setMemberType] = useState("pure_blooded");
@@ -35,7 +35,7 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
       setName(member.name);
       setAlexisName(member.alexisName || "");
       setAddress(member.address);
-      setBatchNumber(member.batchNumber || "");
+      setBatchNumbers(Array.isArray(member.batchNumber) ? member.batchNumber : member.batchNumber ? [member.batchNumber] : []);
       setBatchNames(Array.isArray(member.batchName) ? member.batchName : member.batchName ? [member.batchName] : []);
       setInitiationDate(member.initiationDate ? new Date(member.initiationDate).toISOString().split('T')[0] : "");
       setMemberType(member.memberType || "pure_blooded");
@@ -45,7 +45,7 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
       setName("");
       setAlexisName("");
       setAddress("");
-      setBatchNumber("");
+      setBatchNumbers([]);
       setBatchNames([]);
       setInitiationDate("");
       setMemberType("pure_blooded");
@@ -133,10 +133,10 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
     }
 
     // Batch number is required for pure blooded members only
-    if (memberType === "pure_blooded" && !batchNumber) {
+    if (memberType === "pure_blooded" && batchNumbers.length === 0) {
       toast({
         title: "Error",
-        description: "Batch number is required for pure blooded members",
+        description: "At least one batch number is required for pure blooded members",
         variant: "destructive",
       });
       return;
@@ -156,7 +156,7 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
       name: name.trim(),
       alexisName: alexisName.trim() || undefined,
       address: address.trim(),
-      batchNumber: memberType === "pure_blooded" ? batchNumber.trim() : undefined,
+      batchNumber: memberType === "pure_blooded" && batchNumbers.length > 0 ? batchNumbers.filter(num => num.trim()) : undefined,
       batchName: batchNames.length > 0 ? batchNames.filter(name => name.trim()) : undefined,
       initiationDate: initiationDate,
       memberType: memberType,
@@ -175,7 +175,7 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
     setName("");
     setAlexisName("");
     setAddress("");
-    setBatchNumber("");
+    setBatchNumbers([]);
     setBatchNames([]);
     setInitiationDate("");
     setMemberType("pure_blooded");
