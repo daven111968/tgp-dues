@@ -427,6 +427,12 @@ export default function Members() {
                         </div>
                       )}
                       <div>
+                        <p className="text-sm font-medium text-gray-500">Member Type</p>
+                        <Badge variant="secondary" className="mt-1">
+                          {viewingMember.memberType === 'pure_blooded' ? 'Pure Blooded' : 'Welcome'}
+                        </Badge>
+                      </div>
+                      <div>
                         <p className="text-sm font-medium text-gray-500">Member Status</p>
                         <div className="mt-1">
                           {getMemberStatusBadge(viewingMember.status)}
@@ -437,12 +443,6 @@ export default function Members() {
                         <div className="mt-1">
                           {getPaymentStatusBadge(getMemberPaymentStatus(viewingMember.id).status)}
                         </div>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-500">Member Type</p>
-                        <Badge variant="secondary" className="mt-1">
-                          {viewingMember.memberType === 'pure_blooded' ? 'Pure Blooded' : 'Welcome'}
-                        </Badge>
                       </div>
                     </div>
                   </div>
