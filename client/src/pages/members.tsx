@@ -426,12 +426,7 @@ export default function Members() {
                           <p className="text-sm text-gray-900">{formatDate(viewingMember.welcomingDate)}</p>
                         </div>
                       )}
-                      <div>
-                        <p className="text-sm font-medium text-gray-500">Member Type</p>
-                        <Badge variant="secondary" className="mt-1">
-                          {viewingMember.memberType === 'pure_blooded' ? 'Pure Blooded' : 'Welcome'}
-                        </Badge>
-                      </div>
+
                       <div>
                         <p className="text-sm font-medium text-gray-500">Member Status</p>
                         <div className="mt-1">
