@@ -154,10 +154,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const newMember = await storage.createMember(memberData);
       res.status(201).json(newMember);
     } catch (error) {
+      console.error("Member creation error:", error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid member data", errors: error.errors });
       }
-      res.status(500).json({ message: "Failed to create member" });
+      res.status(500).json({ message: "Failed to create member", error: error.message });
     }
   });
 
