@@ -181,8 +181,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getMemberByBatchNumber(batchNumber: string): Promise<Member | undefined> {
-    const [member] = await db.select().from(members).where(eq(members.batchNumber, batchNumber));
-    return member || undefined;
+    // This function is deprecated since batch numbers are now arrays
+    // Kept for backward compatibility but not used for validation
+    return undefined;
   }
 
   async getMemberByUsername(username: string): Promise<Member | undefined> {

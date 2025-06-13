@@ -130,14 +130,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Check if batch number already exists (only for pure blooded members)
-      if (memberData.batchNumber) {
-        const existingMember = await storage.getMemberByBatchNumber(memberData.batchNumber);
-        if (existingMember) {
-          return res.status(400).json({ error: "A member with this batch number already exists" });
-        }
-      }
-      
       const newMember = await storage.createMember(memberData);
       res.status(201).json({ message: "Registration successful", member: { id: newMember.id, name: newMember.name } });
     } catch (error) {
@@ -158,14 +150,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       const memberData = insertMemberSchema.parse(requestBody);
-      
-      // Check if batch number already exists (only for pure blooded members)
-      if (memberData.batchNumber) {
-        const existingMember = await storage.getMemberByBatchNumber(memberData.batchNumber);
-        if (existingMember) {
-          return res.status(400).json({ error: "A member with this batch number already exists" });
-        }
-      }
       
       const newMember = await storage.createMember(memberData);
       res.status(201).json(newMember);
