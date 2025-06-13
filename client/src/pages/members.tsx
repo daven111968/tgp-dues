@@ -297,7 +297,11 @@ export default function Members() {
                           </div>
                         </TableCell>
                         <TableCell className="text-sm text-gray-900">
-                          {member.batchNumber || "—"}
+                          {member.batchNumber && member.batchNumber.length > 0 
+                            ? (Array.isArray(member.batchNumber) 
+                                ? member.batchNumber.join(", ") 
+                                : member.batchNumber)
+                            : "—"}
                           {member.batchName && (
                             <div className="text-xs text-gray-500">
                               {Array.isArray(member.batchName) 

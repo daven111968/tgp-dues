@@ -15,7 +15,7 @@ export const members = pgTable("members", {
   name: text("name").notNull(),
   alexisName: text("alexis_name"),
   address: text("address").notNull(),
-  batchNumber: text("batch_number").unique(),
+  batchNumber: text("batch_number").array(),
   batchName: text("batch_name").array(),
   initiationDate: timestamp("initiation_date").notNull(),
   memberType: text("member_type").notNull().default("pure_blooded"), // pure_blooded, welcome

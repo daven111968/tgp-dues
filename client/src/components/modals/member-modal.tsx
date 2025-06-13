@@ -59,7 +59,7 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
       name: string;
       alexisName?: string;
       address: string;
-      batchNumber?: string;
+      batchNumber?: string[];
       batchName?: string[];
       initiationDate: string;
       memberType: string;
@@ -92,7 +92,7 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
       name: string;
       alexisName?: string;
       address: string;
-      batchNumber?: string;
+      batchNumber?: string[];
       batchName?: string[];
       initiationDate: string;
       memberType: string;
@@ -229,14 +229,44 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
           {memberType === "pure_blooded" && (
             <>
               <div>
-                <Label htmlFor="batchNumber">Batch Number *</Label>
-                <Input
-                  id="batchNumber"
-                  value={batchNumber}
-                  onChange={(e) => setBatchNumber(e.target.value)}
-                  placeholder={`Batch-${new Date().getFullYear()}`}
-                  required
-                />
+                <Label>Batch Numbers *</Label>
+                <div className="space-y-2">
+                  {batchNumbers.map((number, index) => (
+                    <div key={index} className="flex space-x-2">
+                      <Input
+                        value={number}
+                        onChange={(e) => {
+                          const newNumbers = [...batchNumbers];
+                          newNumbers[index] = e.target.value;
+                          setBatchNumbers(newNumbers);
+                        }}
+                        placeholder={`Batch-${new Date().getFullYear()}`}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const newNumbers = batchNumbers.filter((_, i) => i !== index);
+                          setBatchNumbers(newNumbers);
+                        }}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setBatchNumbers([...batchNumbers, ""])}
+                  >
+                    Add Batch Number
+                  </Button>
+                  {batchNumbers.length === 0 && (
+                    <p className="text-sm text-red-500">At least one batch number is required for pure blooded members</p>
+                  )}
+                </div>
               </div>
               
               <div>
