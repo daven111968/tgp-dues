@@ -156,7 +156,7 @@ export default function Members() {
     };
   };
 
-  const getStatusBadge = (status: string) => {
+  const getPaymentStatusBadge = (status: string) => {
     switch (status) {
       case 'paid':
         return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Paid</Badge>;
@@ -164,6 +164,21 @@ export default function Members() {
         return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">Pending</Badge>;
       case 'overdue':
         return <Badge className="bg-red-100 text-red-800 hover:bg-red-100">Overdue</Badge>;
+      default:
+        return <Badge variant="secondary">Unknown</Badge>;
+    }
+  };
+
+  const getMemberStatusBadge = (status: string) => {
+    switch (status) {
+      case 'active':
+        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Active</Badge>;
+      case 'inactive':
+        return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">Inactive</Badge>;
+      case 'suspended':
+        return <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-100">Suspended</Badge>;
+      case 'expelled':
+        return <Badge className="bg-red-100 text-red-800 hover:bg-red-100">Expelled</Badge>;
       default:
         return <Badge variant="secondary">Unknown</Badge>;
     }
@@ -232,7 +247,8 @@ export default function Members() {
                 <TableRow>
                   <TableHead>Member</TableHead>
                   <TableHead>Batch Number</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>Member Status</TableHead>
+                  <TableHead>Payment Status</TableHead>
                   <TableHead>Last Payment</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
@@ -273,7 +289,10 @@ export default function Members() {
                           )}
                         </TableCell>
                         <TableCell>
-                          {getStatusBadge(paymentStatus.status)}
+                          {getMemberStatusBadge(member.status)}
+                        </TableCell>
+                        <TableCell>
+                          {getPaymentStatusBadge(paymentStatus.status)}
                         </TableCell>
                         <TableCell className="text-sm text-gray-900">{paymentStatus.lastPayment}</TableCell>
                         <TableCell>
@@ -394,9 +413,15 @@ export default function Members() {
                         </div>
                       )}
                       <div>
-                        <p className="text-sm font-medium text-gray-500">Status</p>
+                        <p className="text-sm font-medium text-gray-500">Member Status</p>
                         <div className="mt-1">
-                          {getStatusBadge(getMemberPaymentStatus(viewingMember.id).status)}
+                          {getMemberStatusBadge(viewingMember.status)}
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-500">Payment Status</p>
+                        <div className="mt-1">
+                          {getPaymentStatusBadge(getMemberPaymentStatus(viewingMember.id).status)}
                         </div>
                       </div>
                       <div>

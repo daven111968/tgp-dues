@@ -20,7 +20,7 @@ export const members = pgTable("members", {
   initiationDate: timestamp("initiation_date").notNull(),
   memberType: text("member_type").notNull().default("pure_blooded"), // pure_blooded, welcome
   welcomingDate: timestamp("welcoming_date"),
-  status: text("status").notNull().default("active"), // active, inactive
+  status: text("status").notNull().default("active"), // active, inactive, suspended, expelled
   // Member login credentials
   username: text("username").unique(),
   password: text("password"),
