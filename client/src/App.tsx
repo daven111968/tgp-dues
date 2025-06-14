@@ -50,7 +50,7 @@ function AuthenticatedApp() {
       <div className="flex-1 flex flex-col overflow-hidden">
         <MobileHeader />
         <div className="lg:hidden h-16"></div>
-        <div className="p-4 lg:p-0">
+        <div className="p-2 sm:p-4 lg:p-0">
           <OfflineIndicator />
         </div>
         <Switch>

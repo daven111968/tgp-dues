@@ -204,7 +204,7 @@ export default function Members() {
   }
 
   return (
-    <div className="flex-1 overflow-auto p-6">
+    <div className="flex-1 overflow-auto p-3 sm:p-6">
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Chapter Members</h2>
@@ -254,8 +254,8 @@ export default function Members() {
         </CardContent>
       </Card>
 
-      {/* Members Table */}
-      <Card>
+      {/* Members Table - Desktop */}
+      <Card className="hidden md:block">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table>
@@ -372,18 +372,128 @@ export default function Members() {
         </CardContent>
       </Card>
 
+      {/* Members Cards - Mobile */}
+      <div className="md:hidden space-y-4">
+        {filteredMembers.length === 0 ? (
+          <Card>
+            <CardContent className="p-6 text-center text-gray-500">
+              No members found
+            </CardContent>
+          </Card>
+        ) : (
+          filteredMembers.map((member) => {
+            const paymentStatus = getMemberPaymentStatus(member.id);
+            
+            return (
+              <Card key={member.id} className="hover:shadow-md transition-shadow">
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center flex-1">
+                      <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center mr-3">
+                        <Users className="h-5 w-5 text-gray-600" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium text-gray-900 truncate">
+                          {member.name}
+                          {member.alexisName && (
+                            <span className="text-gray-500 font-normal"> ({member.alexisName})</span>
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-500 truncate">{member.address}</div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2 mb-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-600">Batch:</span>
+                      <span className="text-xs text-gray-900">
+                        {member.batchNumber && member.batchNumber.length > 0 
+                          ? (Array.isArray(member.batchNumber) 
+                              ? member.batchNumber.join(", ") 
+                              : member.batchNumber)
+                          : "—"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-600">Status:</span>
+                      {getMemberStatusBadge(member.status)}
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-600">Payment:</span>
+                      {getPaymentStatusBadge(paymentStatus.status)}
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-600">Last Payment:</span>
+                      <span className="text-xs text-gray-900">{paymentStatus.lastPayment}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleViewMember(member)}
+                      className="flex-1 text-blue-600 border-blue-200 hover:bg-blue-50"
+                    >
+                      <Eye className="h-3 w-3 mr-1" />
+                      View
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditMember(member)}
+                      className="flex-1 text-primary border-primary/20 hover:bg-primary/5"
+                    >
+                      <Edit className="h-3 w-3 mr-1" />
+                      Edit
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleRecordPayment(member.id)}
+                      className="flex-1 text-green-600 border-green-200 hover:bg-green-50"
+                    >
+                      <CreditCard className="h-3 w-3 mr-1" />
+                      Pay
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDeleteMember(member)}
+                      className="flex-1 text-red-600 border-red-200 hover:bg-red-50"
+                    >
+                      <Trash2 className="h-3 w-3 mr-1" />
+                      Delete
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })
+        )}
+        
+        {/* Mobile Pagination Info */}
+        <div className="text-center py-4">
+          <div className="text-sm text-gray-700">
+            Showing {filteredMembers.length} of {members.length} members
+          </div>
+        </div>
+      </div>
+
       {/* Member Details Modal */}
       <Dialog open={isMemberViewOpen} onOpenChange={setIsMemberViewOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
+        <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle className="flex items-center space-x-2">
               <Users className="h-5 w-5" />
               <span>Member Details</span>
             </DialogTitle>
           </DialogHeader>
           
-          {viewingMember && (
-            <div className="space-y-6">
+          <div className="flex-1 overflow-y-auto pr-2 -mr-2">
+            {viewingMember && (
+              <div className="space-y-6 pb-4">
               {/* Member Info */}
               <Card>
                 <CardHeader>
@@ -613,7 +723,8 @@ export default function Members() {
                 </CardContent>
               </Card>
             </div>
-          )}
+            )}
+          </div>
         </DialogContent>
       </Dialog>
 
