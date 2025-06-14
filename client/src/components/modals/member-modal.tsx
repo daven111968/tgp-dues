@@ -188,212 +188,220 @@ export default function MemberModal({ isOpen, onClose, member }: MemberModalProp
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
+      <DialogContent className="max-w-md w-[95vw] max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle>{isEditing ? "Edit Member" : "Add New Member"}</DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="name">Full Name *</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter full name"
-              required
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="alexisName">Alexis Name</Label>
-            <Input
-              id="alexisName"
-              value={alexisName}
-              onChange={(e) => setAlexisName(e.target.value)}
-              placeholder="Enter alexis name (optional)"
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="address">Address *</Label>
-            <Input
-              id="address"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              placeholder="Enter full address"
-              required
-            />
-          </div>
-          
-          {memberType === "pure_blooded" && (
-            <>
-              <div>
-                <Label>Batch Numbers *</Label>
-                <div className="space-y-2">
-                  {batchNumbers.length === 0 ? (
-                    <div className="flex space-x-2">
-                      <Input
-                        value=""
-                        onChange={(e) => setBatchNumbers([e.target.value])}
-                        placeholder={`Batch-${new Date().getFullYear()}`}
-                      />
-                    </div>
-                  ) : (
-                    batchNumbers.map((number, index) => (
-                      <div key={index} className="flex space-x-2">
+        <div className="flex-1 overflow-y-auto pr-2 -mr-2">
+          <form onSubmit={handleSubmit} className="space-y-4 pb-4">
+            <div>
+              <Label htmlFor="name">Full Name *</Label>
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Enter full name"
+                required
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="alexisName">Alexis Name</Label>
+              <Input
+                id="alexisName"
+                value={alexisName}
+                onChange={(e) => setAlexisName(e.target.value)}
+                placeholder="Enter alexis name (optional)"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="address">Address *</Label>
+              <Input
+                id="address"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="Enter full address"
+                required
+              />
+            </div>
+            
+            {memberType === "pure_blooded" && (
+              <>
+                <div>
+                  <Label>Batch Numbers *</Label>
+                  <div className="space-y-2">
+                    {batchNumbers.length === 0 ? (
+                      <div className="flex space-x-2">
                         <Input
-                          value={number}
-                          onChange={(e) => {
-                            const newNumbers = [...batchNumbers];
-                            newNumbers[index] = e.target.value;
-                            setBatchNumbers(newNumbers);
-                          }}
+                          value=""
+                          onChange={(e) => setBatchNumbers([e.target.value])}
                           placeholder={`Batch-${new Date().getFullYear()}`}
                         />
-                        {batchNumbers.length > 1 && (
+                      </div>
+                    ) : (
+                      batchNumbers.map((number, index) => (
+                        <div key={index} className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                          <Input
+                            value={number}
+                            onChange={(e) => {
+                              const newNumbers = [...batchNumbers];
+                              newNumbers[index] = e.target.value;
+                              setBatchNumbers(newNumbers);
+                            }}
+                            placeholder={`Batch-${new Date().getFullYear()}`}
+                            className="flex-1"
+                          />
+                          {batchNumbers.length > 1 && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                const newNumbers = batchNumbers.filter((_, i) => i !== index);
+                                setBatchNumbers(newNumbers);
+                              }}
+                              className="sm:w-auto w-full"
+                            >
+                              Remove
+                            </Button>
+                          )}
+                        </div>
+                      ))
+                    )}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setBatchNumbers([...batchNumbers, ""])}
+                      className="w-full sm:w-auto"
+                    >
+                      Add Batch Number
+                    </Button>
+                  </div>
+                </div>
+                
+                <div>
+                  <Label>Batch Names (Optional)</Label>
+                  <div className="space-y-2">
+                    {batchNames.length === 0 ? (
+                      <div className="text-sm text-gray-500">
+                        No batch names added yet.
+                      </div>
+                    ) : (
+                      batchNames.map((name, index) => (
+                        <div key={index} className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                          <Input
+                            value={name}
+                            onChange={(e) => {
+                              const newNames = [...batchNames];
+                              newNames[index] = e.target.value;
+                              setBatchNames(newNames);
+                            }}
+                            placeholder="Enter batch name"
+                            className="flex-1"
+                          />
                           <Button
                             type="button"
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                              const newNumbers = batchNumbers.filter((_, i) => i !== index);
-                              setBatchNumbers(newNumbers);
+                              const newNames = batchNames.filter((_, i) => i !== index);
+                              setBatchNames(newNames);
                             }}
+                            className="sm:w-auto w-full"
                           >
                             Remove
                           </Button>
-                        )}
-                      </div>
-                    ))
-                  )}
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setBatchNumbers([...batchNumbers, ""])}
-                  >
-                    Add Batch Number
-                  </Button>
+                        </div>
+                      ))
+                    )}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setBatchNames([...batchNames, ""])}
+                      className="w-full sm:w-auto"
+                    >
+                      Add Batch Name
+                    </Button>
+                  </div>
                 </div>
-              </div>
-              
-              <div>
-                <Label>Batch Names (Optional)</Label>
-                <div className="space-y-2">
-                  {batchNames.length === 0 ? (
-                    <div className="text-sm text-gray-500">
-                      No batch names added yet.
-                    </div>
-                  ) : (
-                    batchNames.map((name, index) => (
-                      <div key={index} className="flex space-x-2">
-                        <Input
-                          value={name}
-                          onChange={(e) => {
-                            const newNames = [...batchNames];
-                            newNames[index] = e.target.value;
-                            setBatchNames(newNames);
-                          }}
-                          placeholder="Enter batch name"
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            const newNames = batchNames.filter((_, i) => i !== index);
-                            setBatchNames(newNames);
-                          }}
-                        >
-                          Remove
-                        </Button>
-                      </div>
-                    ))
-                  )}
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setBatchNames([...batchNames, ""])}
-                  >
-                    Add Batch Name
-                  </Button>
-                </div>
-              </div>
-            </>
-          )}
-          
-          <div>
-            <Label htmlFor="initiationDate">Date of Initiation *</Label>
-            <Input
-              id="initiationDate"
-              type="date"
-              value={initiationDate}
-              onChange={(e) => setInitiationDate(e.target.value)}
-              required
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="memberType">Member Type *</Label>
-            <Select value={memberType} onValueChange={setMemberType}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="pure_blooded">Pure Blooded</SelectItem>
-                <SelectItem value="welcome">Welcome</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          {memberType === "welcome" && (
+              </>
+            )}
+            
             <div>
-              <Label htmlFor="welcomingDate">Welcoming Date *</Label>
+              <Label htmlFor="initiationDate">Date of Initiation *</Label>
               <Input
-                id="welcomingDate"
+                id="initiationDate"
                 type="date"
-                value={welcomingDate}
-                onChange={(e) => setWelcomingDate(e.target.value)}
+                value={initiationDate}
+                onChange={(e) => setInitiationDate(e.target.value)}
                 required
               />
             </div>
-          )}
+            
+            <div>
+              <Label htmlFor="memberType">Member Type *</Label>
+              <Select value={memberType} onValueChange={setMemberType}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pure_blooded">Pure Blooded</SelectItem>
+                  <SelectItem value="welcome">Welcome</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {memberType === "welcome" && (
+              <div>
+                <Label htmlFor="welcomingDate">Welcoming Date *</Label>
+                <Input
+                  id="welcomingDate"
+                  type="date"
+                  value={welcomingDate}
+                  onChange={(e) => setWelcomingDate(e.target.value)}
+                  required
+                />
+              </div>
+            )}
+            
+            <div>
+              <Label htmlFor="status">Status</Label>
+              <Select value={status} onValueChange={setStatus}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                  <SelectItem value="suspended">Suspended</SelectItem>
+                  <SelectItem value="expelled">Expelled</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           
-          <div>
-            <Label htmlFor="status">Status</Label>
-            <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-                <SelectItem value="suspended">Suspended</SelectItem>
-                <SelectItem value="expelled">Expelled</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="flex space-x-3 pt-4">
-            <Button 
-              type="button" 
-              variant="outline" 
-              className="flex-1"
-              onClick={handleClose}
-            >
-              Cancel
-            </Button>
-            <Button 
-              type="submit" 
-              className="flex-1"
-              disabled={isPending}
-            >
-              {isPending ? "Saving..." : isEditing ? "Update Member" : "Add Member"}
-            </Button>
-          </div>
-        </form>
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 pt-4 sticky bottom-0 bg-white dark:bg-gray-950 pb-2">
+              <Button 
+                type="button" 
+                variant="outline" 
+                className="flex-1"
+                onClick={handleClose}
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit" 
+                className="flex-1"
+                disabled={isPending}
+              >
+                {isPending ? "Saving..." : isEditing ? "Update Member" : "Add Member"}
+              </Button>
+            </div>
+          </form>
+        </div>
       </DialogContent>
     </Dialog>
   );

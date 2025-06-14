@@ -205,17 +205,17 @@ export default function Members() {
 
   return (
     <div className="flex-1 overflow-auto p-6">
-      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div className="mb-4 sm:mb-0">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Chapter Members</h2>
-          <p className="text-gray-600">Manage member information and dues status</p>
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Chapter Members</h2>
+          <p className="text-sm sm:text-base text-gray-600">Manage member information and dues status</p>
         </div>
         <Button 
           onClick={() => {
             setSelectedMember(undefined);
             setIsMemberModalOpen(true);
           }}
-          className="flex items-center space-x-2"
+          className="flex items-center justify-center space-x-2 w-full sm:w-auto"
         >
           <Plus className="h-4 w-4" />
           <span>Add Member</span>
@@ -224,18 +224,19 @@ export default function Members() {
 
       {/* Search and Filter */}
       <Card className="mb-6">
-        <CardContent className="p-6">
-          <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-4">
             <div className="flex-1">
               <Input
                 type="text"
                 placeholder="Search members..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
+                className="w-full"
               />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-48">
+              <SelectTrigger className="w-full sm:w-48">
                 <SelectValue placeholder="Filter by Status" />
               </SelectTrigger>
               <SelectContent>
